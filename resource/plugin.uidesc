@@ -47,7 +47,7 @@
 
         <!-- Resampling LFO -->
         <view control-tag="Unit1::resampleLfoParam" class="CSlider" origin="516, 196" size="134, 21"
-              max-value="10.f" min-value=".1f" default-value="0.f"
+              max-value="10.f" min-value="0.f" default-value="0.f"
               background-offset="0, 0" bitmap="slider_background"
               bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
               draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
@@ -69,7 +69,7 @@
 
         <!-- Bit crush LFO -->
         <view control-tag="Unit1::bitCrushLfoParam" class="CSlider" origin="516, 272" size="134, 21"
-              max-value="10.f" min-value=".1f" default-value="0.f"
+              max-value="10.f" min-value="0.f" default-value="0.f"
               background-offset="0, 0" bitmap="slider_background"
               bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
               draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
@@ -91,7 +91,7 @@
 
         <!-- Playback LFO -->
         <view control-tag="Unit1::playbackRateLfoParam" class="CSlider" origin="516, 346" size="134, 21"
-              max-value="10.f" min-value=".1f" default-value="0.f"
+              max-value="10.f" min-value="0.f" default-value="0.f"
               background-offset="0, 0" bitmap="slider_background"
               bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
               draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"

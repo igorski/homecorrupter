@@ -79,21 +79,21 @@ tresult PLUGIN_API PluginController::initialize( FUnknown* context )
 // --- AUTO-GENERATED START
 
     RangeParameter* resampleRateParam = new RangeParameter(
-        USTRING( "Resample rate" ), kResampleRateId, USTRING( "factor" ),
+        USTRING( "Resample rate" ), kResampleRateId, USTRING( "%" ),
         0.f, 1.f, 1.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( resampleRateParam );
 
     RangeParameter* bitDepthParam = new RangeParameter(
-        USTRING( "Resolution" ), kBitDepthId, USTRING( "factor" ),
+        USTRING( "Resolution" ), kBitDepthId, USTRING( "%" ),
         0.f, 1.f, 1.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( bitDepthParam );
 
     RangeParameter* playbackRateParam = new RangeParameter(
-        USTRING( "Playback rate" ), kPlaybackRateId, USTRING( "percent" ),
+        USTRING( "Playback rate" ), kPlaybackRateId, USTRING( "%" ),
         0.f, 1.f, 1.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
@@ -101,13 +101,13 @@ tresult PLUGIN_API PluginController::initialize( FUnknown* context )
 
     RangeParameter* resampleLfoParam = new RangeParameter(
         USTRING( "Resampling LFO" ), kResampleLfoId, USTRING( "Hz" ),
-        .1f, 10.f, 0.f,
+        0.f, 10.f, 0.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( resampleLfoParam );
 
     RangeParameter* resampleLfoDepthParam = new RangeParameter(
-        USTRING( "Resampling LFO depth" ), kResampleLfoDepthId, USTRING( "factor" ),
+        USTRING( "Resampling LFO depth" ), kResampleLfoDepthId, USTRING( "%" ),
         0.f, 1.f, 0.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
@@ -115,13 +115,13 @@ tresult PLUGIN_API PluginController::initialize( FUnknown* context )
 
     RangeParameter* bitCrushLfoParam = new RangeParameter(
         USTRING( "Bit crush LFO" ), kBitCrushLfoId, USTRING( "Hz" ),
-        .1f, 10.f, 0.f,
+        0.f, 10.f, 0.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( bitCrushLfoParam );
 
     RangeParameter* bitCrushLfoDepthParam = new RangeParameter(
-        USTRING( "Bit crush LFO depth" ), kBitCrushLfoDepthId, USTRING( "factor" ),
+        USTRING( "Bit crush LFO depth" ), kBitCrushLfoDepthId, USTRING( "%" ),
         0.f, 1.f, 0.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
@@ -129,27 +129,27 @@ tresult PLUGIN_API PluginController::initialize( FUnknown* context )
 
     RangeParameter* playbackRateLfoParam = new RangeParameter(
         USTRING( "Playback LFO" ), kPlaybackRateLfoId, USTRING( "Hz" ),
-        .1f, 10.f, 0.f,
+        0.f, 10.f, 0.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( playbackRateLfoParam );
 
     RangeParameter* playbackRateLfoDepthParam = new RangeParameter(
-        USTRING( "Playback LFO depth" ), kPlaybackRateLfoDepthId, USTRING( "factor" ),
+        USTRING( "Playback LFO depth" ), kPlaybackRateLfoDepthId, USTRING( "%" ),
         0.f, 1.f, 0.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( playbackRateLfoDepthParam );
 
     RangeParameter* wetMixParam = new RangeParameter(
-        USTRING( "Wet mix" ), kWetMixId, USTRING( "factor" ),
+        USTRING( "Wet mix" ), kWetMixId, USTRING( "%" ),
         0.f, 1.f, 1.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
     parameters.addParameter( wetMixParam );
 
     RangeParameter* dryMixParam = new RangeParameter(
-        USTRING( "Dry mix" ), kDryMixId, USTRING( "factor" ),
+        USTRING( "Dry mix" ), kDryMixId, USTRING( "%" ),
         0.f, 1.f, 0.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
@@ -362,57 +362,57 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
 // --- AUTO-GENERATED GETPARAM START
 
         case kResampleRateId:
-            sprintf( text, "%.2f", ( float ) valueNormalized );
+            sprintf( text, "%.2d Hz", ( int ) (( Igorski::VST::SAMPLE_RATE - 1000.f ) * valueNormalized ) + 1000 );
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kBitDepthId:
-            sprintf( text, "%.2f", ( float ) valueNormalized );
+            sprintf( text, "%.2d Bits", ( int ) ( 15 * valueNormalized ) + 1 );
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kPlaybackRateId:
-            sprintf( text, "%.2f", ( float ) valueNormalized );
+            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kResampleLfoId:
-            sprintf( text, "%.2f", ( float ) valueNormalized );
+            sprintf( text, "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kResampleLfoDepthId:
-            sprintf( text, "%.2f", ( float ) valueNormalized );
+            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kBitCrushLfoId:
-            sprintf( text, "%.2f", ( float ) valueNormalized );
+            sprintf( text, "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kBitCrushLfoDepthId:
-            sprintf( text, "%.2f", ( float ) valueNormalized );
+            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kPlaybackRateLfoId:
-            sprintf( text, "%.2f", ( float ) valueNormalized );
+            sprintf( text, "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kPlaybackRateLfoDepthId:
-            sprintf( text, "%.2f", ( float ) valueNormalized );
+            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kWetMixId:
-            sprintf( text, "%.2f", ( float ) valueNormalized );
+            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kDryMixId:
-            sprintf( text, "%.2f", ( float ) valueNormalized );
+            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
