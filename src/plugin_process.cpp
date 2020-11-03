@@ -103,7 +103,7 @@ void PluginProcess::setResampleRate( float value ) {
     _downSampleAmount = scaledAmount;
 
     // in case down sampling is attached to oscillator, keep relative offset of currently moving wave in place
-    _tempDownSampleAmount = ( _hasDownSampleLfo ) ? _downSampleAmount * tempRatio : _downSampleAmount;
+    _tempDownSampleAmount = _hasDownSampleLfo ? _downSampleAmount * tempRatio : _downSampleAmount;
 
     cacheLfo();
     cacheValues();
@@ -145,7 +145,7 @@ void PluginProcess::setPlaybackRate( float value ) {
     _playbackRate = scaledAmount;
 
     // in case playback rate is attached to oscillator, keep relative offset of currently moving wave in place
-    _tempPlaybackRate = ( _hasPlaybackRateLfo ) ? _playbackRate * tempRatio : _playbackRate;
+    _tempPlaybackRate = _hasPlaybackRateLfo ? _playbackRate * tempRatio : _playbackRate;
 
     cacheLfo();
     cacheValues();
@@ -190,13 +190,14 @@ void PluginProcess::cacheValues() {
 }
 
 void PluginProcess::cacheLfo() {
-    _downSampleLfoRange = ( float ) _downSampleAmount * _downSampleLfoDepth;
-    _downSampleLfoMax   = std::min( 1.f, ( float ) _downSampleAmount + _downSampleLfoRange / 2.f );
-    _downSampleLfoMin   = std::max( 0.f, ( float ) _downSampleAmount - _downSampleLfoRange / 2.f );
+    _downSampleLfoRange = _downSampleAmount * _downSampleLfoDepth;
+    // note down sampling is not in 0 - 1 range but rather 0 - _maxDownSample which is the max tolerated value for LfoMax
+    _downSampleLfoMax   = std::min( _maxDownSample, _downSampleAmount + _downSampleLfoRange / 2.f );
+    _downSampleLfoMin   = std::max( 0.f, _downSampleAmount - _downSampleLfoRange / 2.f );
 
-    _playbackRateLfoRange = ( float ) _playbackRate * _playbackRateLfoDepth;
-    _playbackRateLfoMax   = std::min( 1.f, ( float ) _playbackRate + _playbackRateLfoRange / 2.f );
-    _playbackRateLfoMin   = std::max( 0.f, ( float ) _playbackRate - _playbackRateLfoRange / 2.f );
+    _playbackRateLfoRange = _playbackRate * _playbackRateLfoDepth;
+    _playbackRateLfoMax   = std::min( 1.f, _playbackRate + _playbackRateLfoRange / 2.f );
+    _playbackRateLfoMin   = std::max( 0.f, _playbackRate - _playbackRateLfoRange / 2.f );
 }
 
 void PluginProcess::cacheMaxDownSample() {
