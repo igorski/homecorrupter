@@ -42,7 +42,7 @@ const MODEL = [
         unitDescr: '%',
         value: { min: '0.f', max: '1.f', def: '1.f', type: 'percent' },
         ui: { x: 292, y: 272, w: 134, h: 21 },
-        // noet we treat full resolution as 16-bits (but is in fact whatever host is)
+        // note we treat full resolution as 16-bits (but is in fact whatever host is)
         customDescr: 'sprintf( text, "%.2d Bits", ( int ) ( 15 * valueNormalized ) + 1 );'
     },
     {
