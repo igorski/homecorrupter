@@ -42,7 +42,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
     prepareMixBuffers( inBuffer, numInChannels, bufferSize );
 
-    float readPointer; // TODO: when float pitch shifting works on non/low down sampling settings... when int, has less breakup on shifting down sampling
+    float readPointer;
     int writePointer;
     int recordMax = _maxRecordBufferSize - 1;
 
@@ -55,13 +55,10 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
     float downSampleLfoAcc   = _downSampleLfo->getAccumulator();
     float playbackRateLfoAcc = _playbackRateLfo->getAccumulator();
 
-    // dither stuff
+    // dithering variables
 
-    int   r1 = 0, r2 = 0;                //rectangular-PDF random numbers
-    float w  = pow(2.0,/*bits-1*/16-1);   //word length (usually bits=16)
-    float wi = 1.0f/w;
-    float o  = wi * 0.5f;         //remove dc offset
-    float d  = wi / RAND_MAX;     //dither amplitude (2 lsb)
+    int r1 = 0;
+    int r2 = 0;
 
     for ( int32 c = 0; c < numInChannels; ++c )
     {
@@ -87,7 +84,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             channelRecordBuffer[ writePointer ] = ( float ) channelInBuffer[ i ];
         }
 
-        // write current read range downsampled into the premix buffer
+        // write current read range into the premix buffer, downsampling as necessary
 
         i = 0;
 
@@ -95,25 +92,18 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             t  = ( int ) readPointer;
             t2 = std::min( maxT, t + 1 );
 
-            // use floating point resolution when sample rate reduction is minimal/non-existent
-            // and when lower playback rate is defined (crisper results, with more severe
-            // downsampling the artefacts are quite tasty)
-            // TODO : if the dithering issue is solved, this nonsense can go as you can see useFloat = false
-            // (BUT SHOULD PROBABLY BE TRUE FOR SMOOTH RESULTS??)
-            bool useFloat = false;// _tempDownSampleAmount < .1 && _tempPlaybackRate < 1.f;
-
             // these fractionals are in 0 - 1 range
-            frac     = useFloat ? readPointer - t : 0;
-            fracNext = useFloat ? ( readPointer + 1 ) : t + 1 - t2;
+            // NOTE: we have uncommented readPointer (float) to use t (int)
+            // as it is devilishly tasty when down sampling
+
+            frac     = /*readPointer - t :*/ 0;
+            fracNext = /*readPointer */ t + 1 - t2;
 
             s1 = channelRecordBuffer[ t ];
             s2 = channelRecordBuffer[ t2 ];
 
             float inSample   = ( s1 + ( s2 - s1 ) * frac );
             float outSample  = inSample * .5;
-            // used to be the below, no lastSample usage and channelPremixBuffer[ i ] was immediately assigned outSample
-            //float nextSample = ( s2 + ( s3 - s2 ) * fracNext ); // references the next sample for anti aliasing purposes (needs t3 and s3)
-            //float outSample  = ( inSample * .75 ) + ( nextSample * .25 ); // TODO: smoothing (filter_state ?)
 
             int start = i;
             for ( l = std::min( bufferSize, start + _sampleIncr ); i < l; ++i ) {
@@ -122,7 +112,8 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                 r1 = rand();
 
                 float nextSample = outSample + lastSample;
-                channelPreMixBuffer[ i ] = nextSample + o + d * ( float )( r1 - r2 ); // correct DC offset and apply dither
+                // correct DC offset and apply dither
+                channelPreMixBuffer[ i ] = nextSample + DITHER_DC_OFFSET + DITHER_AMPLITUDE * ( float )( r1 - r2 );
                 lastSample = nextSample * .25;
 
                 // update the increment in case the LFO's have updated the down sampling amount or playback rate
@@ -183,7 +174,7 @@ void PluginProcess::prepareMixBuffers( SampleType** inBuffer, int numInChannels,
     // if the record buffer wasn't created yet or the buffer size has changed
     // delete existing buffer and create new one to match properties
 
-    int recordSize = bufferSize * ( int ) ( MAX_DOWNSAMPLE / MIN_PLAYBACK_SPEED );
+    int recordSize = bufferSize * ( int ) ( _maxDownSample / MIN_PLAYBACK_SPEED );
     if ( _recordBuffer == nullptr || _recordBuffer->bufferSize != recordSize ) {
         delete _recordBuffer;
         _recordBuffer = new AudioBuffer( numInChannels, recordSize );

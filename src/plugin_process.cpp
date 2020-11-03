@@ -29,6 +29,7 @@ namespace Igorski {
 
 PluginProcess::PluginProcess( int amountOfChannels ) {
     _amountOfChannels = amountOfChannels;
+    cacheMaxDownSample();
 
      _lastSamples = new float[ amountOfChannels ];
 
@@ -93,7 +94,7 @@ void PluginProcess::setResampleRate( float value ) {
     float downSampleValue = abs( value - 1.f );
 
     float tempRatio = _tempDownSampleAmount / std::max( 0.000000001f, _downSampleAmount );
-    float scaledAmount = Calc::scale( downSampleValue, 1.f, MAX_DOWNSAMPLE - 1.f ) + 1.f;
+    float scaledAmount = Calc::scale( downSampleValue, 1.f, _maxDownSample - 1.f ) + 1.f;
 
     if ( scaledAmount != _downSampleAmount && _recordBuffer != nullptr ) {
         float ratio  = scaledAmount / _downSampleAmount;
@@ -196,6 +197,11 @@ void PluginProcess::cacheLfo() {
     _playbackRateLfoRange = ( float ) _playbackRate * _playbackRateLfoDepth;
     _playbackRateLfoMax   = std::min( 1.f, ( float ) _playbackRate + _playbackRateLfoRange / 2.f );
     _playbackRateLfoMin   = std::max( 0.f, ( float ) _playbackRate - _playbackRateLfoRange / 2.f );
+}
+
+void PluginProcess::cacheMaxDownSample() {
+    // we allow downsampling all the way down to 1 kHz
+    _maxDownSample = VST::SAMPLE_RATE / 1000.f;
 }
 
 }
