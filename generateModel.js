@@ -28,21 +28,21 @@ const MODEL = [
         descr: 'Resample rate',
         unitDescr: 'factor',
         value: { min: '0.f', max: '1.f', def: '1.f' },
-        ui: { x: 282, y: 175, w: 134, h: 21 }
+        ui: { x: 292, y: 196, w: 134, h: 21 }
     },
     {
         name: 'bitDepth',
         descr: 'Resolution',
         unitDescr: 'factor',
         value: { min: '0.f', max: '1.f', def: '1.f' },
-        ui: { x: 282, y: 251, w: 134, h: 21 }
+        ui: { x: 292, y: 272, w: 134, h: 21 }
     },
     {
         name: 'playbackRate',
         descr: 'Playback rate',
         unitDescr: 'percent',
         value: { min: '0.f', max: '1.f', def: '1.f' },
-        ui: { x: 282, y: 325, w: 134, h: 21 }
+        ui: { x: 292, y: 346, w: 134, h: 21 }
     },
     // LFO (note constants for min/max defined in global.h)
     {
@@ -50,56 +50,56 @@ const MODEL = [
         descr: 'Resampling LFO',
         unitDescr: 'Hz',
         value: { min: '.1f', max: '10.f', def: '0.f' },
-        ui: { x: 506, y: 175, w: 134, h: 21 }
+        ui: { x: 516, y: 196, w: 134, h: 21 }
     },
     {
         name: 'resampleLfoDepth',
         descr: 'Resampling LFO depth',
         unitDescr: 'factor',
         value: { min: '0.f', max: '1.f', def: '0.f' },
-        ui: { x: 506, y: 206, w: 134, h: 21 }
+        ui: { x: 516, y: 227, w: 134, h: 21 }
     },
     {
         name: 'bitCrushLfo',
         descr: 'Bit crush LFO',
         unitDescr: 'Hz',
         value: { min: '.1f', max: '10.f', def: '0.f' },
-        ui: { x: 506, y: 251, w: 134, h: 21 }
+        ui: { x: 516, y: 272, w: 134, h: 21 }
     },
     {
         name: 'bitCrushLfoDepth',
         descr: 'Bit crush LFO depth',
         unitDescr: 'factor',
         value: { min: '0.f', max: '1.f', def: '0.f' },
-        ui: { x: 506, y: 279, w: 134, h: 21 }
+        ui: { x: 516, y: 300, w: 134, h: 21 }
     },
     {
         name: 'playbackRateLfo',
         descr: 'Playback LFO',
         unitDescr: 'Hz',
         value: { min: '.1f', max: '10.f', def: '0.f' },
-        ui: { x: 506, y: 325, w: 134, h: 21 }
+        ui: { x: 516, y: 346, w: 134, h: 21 }
     },
     {
         name: 'playbackRateLfoDepth',
         descr: 'Playback LFO depth',
         unitDescr: 'factor',
         value: { min: '0.f', max: '1.f', def: '0.f' },
-        ui: { x: 506, y: 355, w: 134, h: 21 }
+        ui: { x: 516, y: 376, w: 134, h: 21 }
     },
     {
         name: 'wetMix',
         descr: 'Wet mix',
         unitDescr: 'factor',
         value: { min: '0.f', max: '1.f', def: '1.f' },
-        ui: { x: 282, y: 406, w: 134, h: 21 }
+        ui: { x: 292, y: 427, w: 134, h: 21 }
     },
     {
         name: 'dryMix',
         descr: 'Dry mix',
         unitDescr: 'factor',
         value: { min: '0.f', max: '1.f', def: '0.f' },
-        ui: { x: 506, y: 406, w: 134, h: 21 }
+        ui: { x: 516, y: 427, w: 134, h: 21 }
     }
 ];
 
