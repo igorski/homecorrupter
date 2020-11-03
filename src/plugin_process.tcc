@@ -47,7 +47,6 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
     int recordMax = _maxRecordBufferSize - 1;
 
     int t, t2;
-    int maxT = bufferSize - 1;
     float incr, frac, s1, s2;
 
     // cache oscillator positions (are reset for each channel)
@@ -90,7 +89,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
         while ( i < bufferSize ) {
             t  = ( int ) readPointer;
-            t2 = std::min( maxT, t + 1 );
+            t2 = std::min( recordMax, t + 1 );
 
             // this fractionals is in the 0 - 1 range
             // NOTE: we have uncommented readPointer (float) to use t (int)
@@ -113,6 +112,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                 float nextSample = outSample + lastSample;
 
                 // correct DC offset and apply dither
+
                 channelPreMixBuffer[ i ] = nextSample + DITHER_DC_OFFSET + DITHER_AMPLITUDE * ( float )( r1 - r2 );
                 lastSample = nextSample * .25;
 
