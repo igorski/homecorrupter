@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<vstgui-ui-description version="1">
+    <fonts>
+    </fonts>
+    <colors>
+        <color name="Focus" rgba="#279bffff"/>
+    </colors>
+    <template
+        maxSize="893, 633" minSize="893, 633" size="893, 633" name="view" opacity="1" origin="0, 0"
+        background-color="~ BlackCColor" background-color-draw-style="filled and stroked" bitmap="background"
+        class="CViewContainer"  mouse-enabled="true"  transparent="false">
+
+<!-- AUTO-GENERATED CONTROLS START -->
+
+        <!-- Resample rate -->
+        <view control-tag="Unit1::resampleRateParam" class="CSlider" origin="282, 175" size="134, 21"
+              max-value="1.f" min-value="0.f" default-value="1.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
+        />
+
+        <!-- Resolution -->
+        <view control-tag="Unit1::bitDepthParam" class="CSlider" origin="282, 251" size="134, 21"
+              max-value="1.f" min-value="0.f" default-value="1.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
+        />
+
+        <!-- Playback rate -->
+        <view control-tag="Unit1::playbackRateParam" class="CSlider" origin="282, 325" size="134, 21"
+              max-value="1.f" min-value="0.f" default-value="1.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
+        />
+
+        <!-- Resampling LFO -->
+        <view control-tag="Unit1::resampleLfoParam" class="CSlider" origin="506, 175" size="134, 21"
+              max-value="10.f" min-value=".1f" default-value="0.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
+        />
+
+        <!-- Resampling LFO depth -->
+        <view control-tag="Unit1::resampleLfoDepthParam" class="CSlider" origin="506, 206" size="134, 21"
+              max-value="1.f" min-value="0.f" default-value="0.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
+        />
+
+        <!-- Bit crush LFO -->
+        <view control-tag="Unit1::bitCrushLfoParam" class="CSlider" origin="506, 251" size="134, 21"
+              max-value="10.f" min-value=".1f" default-value="0.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
+        />
+
+        <!-- Bit crush LFO depth -->
+        <view control-tag="Unit1::bitCrushLfoDepthParam" class="CSlider" origin="506, 279" size="134, 21"
+              max-value="1.f" min-value="0.f" default-value="0.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
+        />
+
+        <!-- Playback LFO -->
+        <view control-tag="Unit1::playbackRateLfoParam" class="CSlider" origin="506, 325" size="134, 21"
+              max-value="10.f" min-value=".1f" default-value="0.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
+        />
+
+        <!-- Playback LFO depth -->
+        <view control-tag="Unit1::playbackRateLfoDepthParam" class="CSlider" origin="506, 355" size="134, 21"
+              max-value="1.f" min-value="0.f" default-value="0.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
+        />
+
+        <!-- Wet mix -->
+        <view control-tag="Unit1::wetMixParam" class="CSlider" origin="282, 406" size="134, 21"
+              max-value="1.f" min-value="0.f" default-value="1.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
+        />
+
+        <!-- Dry mix -->
+        <view control-tag="Unit1::dryMixParam" class="CSlider" origin="506, 406" size="134, 21"
+              max-value="1.f" min-value="0.f" default-value="0.f"
+              background-offset="0, 0" bitmap="slider_background"
+              bitmap-offset="0, 0" draw-back="false" draw-back-color="~ WhiteCColor" draw-frame="false"
+              draw-frame-color="~ WhiteCColor" draw-value="false" draw-value-color="~ WhiteCColor" draw-value-from-center="false"
+              draw-value-inverted="false" handle-bitmap="slider_handle" handle-offset="0, 0"
+              mode="free click" mouse-enabled="true" opacity="1" orientation="horizontal" reverse-orientation="false"
+              transparent="true" transparent-handle="true" wheel-inc-value="0.1" zoom-factor="10"
+        />
+
+<!-- AUTO-GENERATED CONTROLS END -->
+
+    </template>
+    <variables/>
+    <custom>
+        <attributes color="Focus" enabled="false" name="FocusDrawing" width="1"/>
+        <attributes Size="5, 5" name="UIGridController"/>
+        <attributes SelectedTemplate="view" name="UITemplateController"/>
+        <attributes EditViewScale="1" EditorSize="0, 0, 882, 716"
+                    SplitViewSize_0_0="0.6402877697841726778449356061173602938652"
+                    SplitViewSize_0_1="0.3309352517985611474848894886235939338803"
+                    SplitViewSize_1_0="0.506474820143884896239683257590513676405"
+                    SplitViewSize_1_1="0.486330935251798546214985208280268125236"
+                    SplitViewSize_2_0="0.636054421768707523021646466077072545886"
+                    SplitViewSize_2_1="0.3582766439909297329080573035753332078457"
+                    TabSwitchValue="0" Version="1" name="UIEditController" />
+        <attributes name="UIAttributesController"/>
+        <attributes SelectedRow="23" name="UIViewCreatorDataSource"/>
+        <attributes SelectedRow="4" name="UIBitmapsDataSource"/>
+        <attributes Path="resource/plugin.uidesc" name="VST3Editor"/>
+        <attributes SelectedRow="2" name="UITagsDataSource"/>
+        <attributes SelectedRow="0" name="UIColorsDataSource"/>
+        <attributes SelectedRow="-1" name="UIGradientsDataSource"/>
+        <attributes SelectedRow="-1" name="UIFontsDataSource"/>
+    </custom>
+    <bitmaps>
+        <bitmap name="background" path="background.png"/>
+        <bitmap name="slider_background" path="slider_background.png"/>
+        <bitmap name="slider_handle" path="slider_handle.png"/>
+        <bitmap name="slider_handle#2x" path="slider_handle_2.0x.png" scale-factor="2"/>
+    </bitmaps>
+
+    <!-- map the controllers listed above to their paramids by tag index -->
+
+    <control-tags>
+        <control-tag name="UI::SendMessage" tag="1000"/>
+
+<!-- AUTO-GENERATED TAGS START -->
+       <control-tag name="Unit1::resampleRateParam" tag="0" />
+       <control-tag name="Unit1::bitDepthParam" tag="1" />
+       <control-tag name="Unit1::playbackRateParam" tag="2" />
+       <control-tag name="Unit1::resampleLfoParam" tag="3" />
+       <control-tag name="Unit1::resampleLfoDepthParam" tag="4" />
+       <control-tag name="Unit1::bitCrushLfoParam" tag="5" />
+       <control-tag name="Unit1::bitCrushLfoDepthParam" tag="6" />
+       <control-tag name="Unit1::playbackRateLfoParam" tag="7" />
+       <control-tag name="Unit1::playbackRateLfoDepthParam" tag="8" />
+       <control-tag name="Unit1::wetMixParam" tag="9" />
+       <control-tag name="Unit1::dryMixParam" tag="10" />
+
+<!-- AUTO-GENERATED TAGS END -->
+    </control-tags>
+</vstgui-ui-description>
