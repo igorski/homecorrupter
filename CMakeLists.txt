@@ -1,6 +1,6 @@
-﻿#####################################
-# CMake Project for __PLUGIN_NAME__ Plugin #
-#####################################
+﻿##########################################
+# CMake Project for Homecorrupter Plugin #
+##########################################
 
 cmake_minimum_required(VERSION 3.12)
 set(CMAKE_COLOR_MAKEFILE ON)
@@ -8,8 +8,8 @@ set(CMAKE_COLOR_MAKEFILE ON)
 # uncomment to build as VST2.4 instead of VST3.0 (provides wider DAW compatibility), not supported on Linux
 #set(SMTG_CREATE_VST2_VERSION "Use VST2" ON)
 
-project(__PLUGIN_NAME__)
-set(target __PLUGIN_NAME__)
+project(homecorrupter)
+set(target homecorrupter)
 set(copyright "igorski.nl 2020")
 set(major_version 1)
 set(minor_version 0)

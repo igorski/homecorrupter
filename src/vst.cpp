@@ -40,7 +40,7 @@ namespace Igorski {
 //------------------------------------------------------------------------
 // Plugin Implementation
 //------------------------------------------------------------------------
-__PLUGIN_NAME__::__PLUGIN_NAME__()
+Homecorrupter::Homecorrupter()
 : pluginProcess( nullptr )
 , outputGainOld( 0.f )
 , currentProcessMode( -1 ) // -1 means not initialized
@@ -53,14 +53,14 @@ __PLUGIN_NAME__::__PLUGIN_NAME__()
 }
 
 //------------------------------------------------------------------------
-__PLUGIN_NAME__::~__PLUGIN_NAME__()
+Homecorrupter::~Homecorrupter()
 {
     // free all allocated resources
     delete pluginProcess;
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API __PLUGIN_NAME__::initialize( FUnknown* context )
+tresult PLUGIN_API Homecorrupter::initialize( FUnknown* context )
 {
     //---always initialize the parent-------
     tresult result = AudioEffect::initialize( context );
@@ -79,19 +79,19 @@ tresult PLUGIN_API __PLUGIN_NAME__::initialize( FUnknown* context )
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API __PLUGIN_NAME__::terminate()
+tresult PLUGIN_API Homecorrupter::terminate()
 {
     // nothing to do here yet...except calling our parent terminate
     return AudioEffect::terminate();
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API __PLUGIN_NAME__::setActive (TBool state)
+tresult PLUGIN_API Homecorrupter::setActive (TBool state)
 {
     if (state)
-        sendTextMessage( "__PLUGIN_NAME__::setActive (true)" );
+        sendTextMessage( "Homecorrupter::setActive (true)" );
     else
-        sendTextMessage( "__PLUGIN_NAME__::setActive (false)" );
+        sendTextMessage( "Homecorrupter::setActive (false)" );
 
     // reset output level meter
     outputGainOld = 0.f;
@@ -101,7 +101,7 @@ tresult PLUGIN_API __PLUGIN_NAME__::setActive (TBool state)
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API __PLUGIN_NAME__::process( ProcessData& data )
+tresult PLUGIN_API Homecorrupter::process( ProcessData& data )
 {
     // In this example there are 4 steps:
     // 1) Read inputs parameters coming from host (in order to adapt our model values)
@@ -267,10 +267,10 @@ tresult PLUGIN_API __PLUGIN_NAME__::process( ProcessData& data )
 }
 
 //------------------------------------------------------------------------
-tresult __PLUGIN_NAME__::receiveText( const char* text )
+tresult Homecorrupter::receiveText( const char* text )
 {
     // received from Controller
-    fprintf( stderr, "[__PLUGIN_NAME__] received: " );
+    fprintf( stderr, "[Homecorrupter] received: " );
     fprintf( stderr, "%s", text );
     fprintf( stderr, "\n" );
 
@@ -278,7 +278,7 @@ tresult __PLUGIN_NAME__::receiveText( const char* text )
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API __PLUGIN_NAME__::setState( IBStream* state )
+tresult PLUGIN_API Homecorrupter::setState( IBStream* state )
 {
     // called when we load a preset, the model has to be reloaded
 
@@ -400,7 +400,7 @@ tresult PLUGIN_API __PLUGIN_NAME__::setState( IBStream* state )
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API __PLUGIN_NAME__::getState( IBStream* state )
+tresult PLUGIN_API Homecorrupter::getState( IBStream* state )
 {
     // here we save the model values
 
@@ -458,7 +458,7 @@ tresult PLUGIN_API __PLUGIN_NAME__::getState( IBStream* state )
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API __PLUGIN_NAME__::setupProcessing( ProcessSetup& newSetup )
+tresult PLUGIN_API Homecorrupter::setupProcessing( ProcessSetup& newSetup )
 {
     // called before the process call, always in a disabled state (not active)
 
@@ -482,7 +482,7 @@ tresult PLUGIN_API __PLUGIN_NAME__::setupProcessing( ProcessSetup& newSetup )
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API __PLUGIN_NAME__::setBusArrangements( SpeakerArrangement* inputs,  int32 numIns,
+tresult PLUGIN_API Homecorrupter::setBusArrangements( SpeakerArrangement* inputs,  int32 numIns,
                                                  SpeakerArrangement* outputs, int32 numOuts )
 {
     if ( numIns == 1 && numOuts == 1 )
@@ -536,7 +536,7 @@ tresult PLUGIN_API __PLUGIN_NAME__::setBusArrangements( SpeakerArrangement* inpu
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API __PLUGIN_NAME__::canProcessSampleSize( int32 symbolicSampleSize )
+tresult PLUGIN_API Homecorrupter::canProcessSampleSize( int32 symbolicSampleSize )
 {
     if ( symbolicSampleSize == kSample32 )
         return kResultTrue;
@@ -549,7 +549,7 @@ tresult PLUGIN_API __PLUGIN_NAME__::canProcessSampleSize( int32 symbolicSampleSi
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API __PLUGIN_NAME__::notify( IMessage* message )
+tresult PLUGIN_API Homecorrupter::notify( IMessage* message )
 {
     if ( !message )
         return kInvalidArgument;
@@ -564,7 +564,7 @@ tresult PLUGIN_API __PLUGIN_NAME__::notify( IMessage* message )
             // size should be 100
             if ( size == 100 && ((char*)data)[1] == 1 ) // yeah...
             {
-                fprintf( stderr, "[__PLUGIN_NAME__] received the binary message!\n" );
+                fprintf( stderr, "[Homecorrupter] received the binary message!\n" );
             }
             return kResultOk;
         }
@@ -572,20 +572,25 @@ tresult PLUGIN_API __PLUGIN_NAME__::notify( IMessage* message )
     return AudioEffect::notify( message );
 }
 
-void __PLUGIN_NAME__::syncModel()
+void Homecorrupter::syncModel()
 {
     // forward the protected model values onto the plugin process and related processors
+
     pluginProcess->setResampleRate( fResampleRate );
-    pluginProcess->setPlaybackRate( fPlaybackRate );
     pluginProcess->bitCrusher->setAmount( fBitDepth );
-    pluginProcess->setDryMix( fDryMix );
-    pluginProcess->setWetMix( fWetMix );
+    pluginProcess->setPlaybackRate( fPlaybackRate );
+
     // note we attenuate the signal at lower bit depths as the dynamic range decreases and volume builds up
     pluginProcess->bitCrusher->setOutputMix( fBitDepth > .3f ? 1.f : .4f );
+
     // oscillators
     pluginProcess->setResampleLfo( fResampleLfo, fResampleLfoDepth );
     pluginProcess->setPlaybackRateLfo( fPlaybackRateLfo, fPlaybackRateLfoDepth );
     pluginProcess->bitCrusher->setLFO( fBitCrushLfo, fBitCrushLfoDepth );
+
+    // output mix
+    pluginProcess->setDryMix( fDryMix );
+    pluginProcess->setWetMix( fWetMix );
 }
 
 }

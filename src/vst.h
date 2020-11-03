@@ -34,17 +34,17 @@ namespace Igorski {
 //------------------------------------------------------------------------
 // Plugin entry point class
 //------------------------------------------------------------------------
-class __PLUGIN_NAME__ : public AudioEffect
+class Homecorrupter : public AudioEffect
 {
     public:
-        __PLUGIN_NAME__ ();
-        virtual ~__PLUGIN_NAME__(); // do not forget virtual here
+        Homecorrupter ();
+        virtual ~Homecorrupter(); // do not forget virtual here
 
         //--- ---------------------------------------------------------------------
         // create function required for Plug-in factory,
         // it will be called to create new instances of this Plug-in
         //--- ---------------------------------------------------------------------
-        static FUnknown* createInstance( void* /*context*/ ) { return ( IAudioProcessor* ) new __PLUGIN_NAME__; }
+        static FUnknown* createInstance( void* /*context*/ ) { return ( IAudioProcessor* ) new Homecorrupter; }
 
         //--- ---------------------------------------------------------------------
         // AudioEffect overrides:

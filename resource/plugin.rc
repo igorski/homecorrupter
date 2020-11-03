@@ -31,7 +31,7 @@ BEGIN
         BEGIN
             VALUE "FileVersion",      FULL_VERSION_STR"\0"
             VALUE "ProductVersion",   FULL_VERSION_STR"\0"
-            VALUE "OriginalFilename", "__PLUGIN_NAME__.vst3\0"
+            VALUE "OriginalFilename", "homecorrupter.vst3\0"
             VALUE "FileDescription",  stringFileDescription"\0"
             VALUE "InternalName",     stringFileDescription"\0"
             VALUE "ProductName",      stringFileDescription"\0"

@@ -21,11 +21,11 @@
 // Version without build number (example "1.0.3")
 #define VERSION_STR MAJOR_VERSION_STR "." SUB_VERSION_STR "." RELEASE_NUMBER_STR
 
-#define stringOriginalFilename  "__PLUGIN_NAME__.vst3"
+#define stringOriginalFilename  "homecorrupter.vst3"
 #if PLATFORM_64
-#define stringFileDescription   "__PLUGIN_NAME__ plugin (64Bit)"
+#define stringFileDescription   "Homecorrupter plugin (64Bit)"
 #else
-#define stringFileDescription   "__PLUGIN_NAME__ plugin"
+#define stringFileDescription   "Homecorrupter plugin"
 #endif
 #define stringCompanyName       "igorski.nl\0"
 #define stringLegalCopyright    #PLUGIN_COPYRIGHT

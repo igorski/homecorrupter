@@ -66,7 +66,7 @@ tresult PLUGIN_API PluginController::initialize( FUnknown* context )
     unitInfo.id = 1;
     unitInfo.parentUnitId = kRootUnitId;    // attached to the root unit
 
-    Steinberg::UString( unitInfo.name, USTRINGSIZE( unitInfo.name )).assign( USTRING( "__PLUGIN_NAME__" ));
+    Steinberg::UString( unitInfo.name, USTRINGSIZE( unitInfo.name )).assign( USTRING( "Homecorrupter" ));
 
     unitInfo.programListId = kNoProgramListId;
 
@@ -159,7 +159,7 @@ tresult PLUGIN_API PluginController::initialize( FUnknown* context )
 
     // initialization
 
-    String str( "__PLUGIN_NAME__" );
+    String str( "Homecorrupter" );
     str.copyTo16( defaultMessageText, 0, 127 );
 
     return result;

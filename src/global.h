@@ -10,7 +10,7 @@ namespace Igorski {
 namespace VST {
 
     static const int   ID       = 97151818;
-    static const char* NAME     = "__PLUGIN_NAME__";
+    static const char* NAME     = "Homecorrupter";
     static const char* VENDOR   = "igorski.nl";
 
     // generate unique UIDs for these

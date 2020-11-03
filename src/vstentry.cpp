@@ -77,13 +77,13 @@ BEGIN_FACTORY_DEF( "igorski.nl",
                 "Fx",                            // Subcategory for this Plug-in
                 FULL_VERSION_STR,                // Plug-in version
                 kVstVersionString,               // the VST 3 SDK version (do not change this)
-                __PLUGIN_NAME__::createInstance )       // function pointer called when this component should be instantiated
+                Homecorrupter::createInstance )       // function pointer called when this component should be instantiated
 
     // its kVstComponentControllerClass component
     DEF_CLASS2( INLINE_UID_FROM_FUID( Igorski::VST::PluginControllerUID ),
                 PClassInfo::kManyInstances,   // cardinality
                 kVstComponentControllerClass, // the Controller category (do not change this)
-                "__PLUGIN_NAME__Controller",  // controller name (could be the same as component name)
+                "HomecorrupterController",  // controller name (could be the same as component name)
                 0, "",                        // neither of these are used here
                 FULL_VERSION_STR,             // Plug-in version
                 kVstVersionString,            // the VST 3 SDK version (do not change this)

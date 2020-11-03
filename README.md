@@ -1,6 +1,6 @@
-# __PLUGIN_NAME__
+# Homecorrupter
 
-__PLUGIN_NAME__ is a VST/AU plug-in which provides a
+Homecorrupter is a VST/AU plug-in which allows the reduction of sample rate, bit depth and playback speed of any incoming audio, on the fly.
 
 ## On compatibility
 
@@ -56,7 +56,7 @@ And if you are running Linux, you can easily resolve all dependencies by first r
 
 ### Building the plugin
 
-Run CMake to generate the Makefile for your environment, after which you can compile the plugin using make. The build output will be stored in _./build/VST3/__PLUGIN_NAME__.vst3_ as well as symbolically linked to your systems VST-plugin folder (on Unix).
+Run CMake to generate the Makefile for your environment, after which you can compile the plugin using make. The build output will be stored in _./build/VST3/homecorrupter.vst3_ as well as symbolically linked to your systems VST-plugin folder (on Unix).
 
 You must provide the path to the Steinberg SDK by providing _VST3_SDK_ROOT_ to CMake like so:
 
@@ -90,8 +90,8 @@ You can copy the build output into your system VST(3) folder and run it directly
 
 When debugging, you can also choose to run the plugin against Steinbergs validator and editor host utilities:
 
-    {VST3_SDK_ROOT}/build/bin/validator  build/VST3/__PLUGIN_NAME__.vst3
-    {VST3_SDK_ROOT}/build/bin/editorhost build/VST3/__PLUGIN_NAME__.vst3
+    {VST3_SDK_ROOT}/build/bin/validator  build/VST3/homecorrupter.vst3
+    {VST3_SDK_ROOT}/build/bin/editorhost build/VST3/homecorrupter.vst3
 
 ### Build as Audio Unit (macOS only)
 
@@ -105,7 +105,7 @@ Is aided by the excellent [Jamba framework](https://github.com/pongasoft/jamba) 
 VST3_SDK_ROOT=/path/to/VST_SDK/VST3_SDK sh build_au.sh
 ```
 
-The subsequent Audio Unit component will be located in _./build/VST3/__PLUGIN_NAME__.component_ as well as linked
+The subsequent Audio Unit component will be located in _./build/VST3/homecorrupter.component_ as well as linked
 in _~/Library/Audio/Plug-Ins/Components/_
 
 You can validate the Audio Unit using Apple's _auval_ utility, by running _auval -v aufx dely IGOR_ on the command line. Note that there is the curious behaviour that you might need to reboot before the plugin shows up, though you can force a flush of the Audio Unit cache at runtime by running _killall -9 AudioComponentRegistrar_.
