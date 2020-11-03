@@ -18,8 +18,7 @@ namespace VST {
     static const FUID PluginWithSideChainProcessorUID( 0x528F457D, 0xBA31BDFB, 0x70A7A2DA, 0x31C358F3 );
     static const FUID PluginControllerUID( 0xCF48474A, 0xB7E202CD, 0x66D160D9, 0xF99D622B );
 
-    // set upon initialization, see vst.cpp
-    extern float SAMPLE_RATE;
+    extern float SAMPLE_RATE; // set upon initialization, see vst.cpp
 
     static const float PI     = 3.141592653589793f;
     static const float TWO_PI = PI * 2.f;

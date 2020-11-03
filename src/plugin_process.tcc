@@ -48,7 +48,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
     int t, t2;
     int maxT = bufferSize - 1;
-    float incr, frac, fracNext, s1, s2;
+    float incr, frac, s1, s2;
 
     // cache oscillator positions (are reset for each channel)
 
@@ -92,12 +92,11 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             t  = ( int ) readPointer;
             t2 = std::min( maxT, t + 1 );
 
-            // these fractionals are in 0 - 1 range
+            // this fractionals is in the 0 - 1 range
             // NOTE: we have uncommented readPointer (float) to use t (int)
             // as it is devilishly tasty when down sampling
 
-            frac     = /*readPointer - t :*/ 0;
-            fracNext = /*readPointer */ t + 1 - t2;
+            frac = /*readPointer - t :*/ 0;
 
             s1 = channelRecordBuffer[ t ];
             s2 = channelRecordBuffer[ t2 ];
@@ -112,6 +111,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                 r1 = rand();
 
                 float nextSample = outSample + lastSample;
+
                 // correct DC offset and apply dither
                 channelPreMixBuffer[ i ] = nextSample + DITHER_DC_OFFSET + DITHER_AMPLITUDE * ( float )( r1 - r2 );
                 lastSample = nextSample * .25;
@@ -122,7 +122,6 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                 // run the oscillators, note we multiply by .5 and add .5 to make the LFO's bipolar waveforms unipolar
 
                 if ( _hasDownSampleLfo ) {
-                    // TODO: doesn't do much?
                     float lfoValue = _downSampleLfo->peek() * .5f + .5f;
                     _tempDownSampleAmount = std::min( _downSampleLfoMax, _downSampleLfoMin + _downSampleLfoRange * lfoValue );
                     cacheValues();
