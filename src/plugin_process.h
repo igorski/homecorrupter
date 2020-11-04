@@ -26,6 +26,7 @@
 #include "global.h"
 #include "audiobuffer.h"
 #include "bitcrusher.h"
+#include "decimator.h"
 #include "limiter.h"
 #include <vector>
 
@@ -80,7 +81,7 @@ class PluginProcess
         float _tempDownSampleAmount;
         float _playbackRate;
         float _tempPlaybackRate;
-        int _sampleIncr;
+        float _sampleIncr;
         int _amountOfChannels;
         float _maxDownSample;
         float* _lastSamples;
@@ -99,6 +100,8 @@ class PluginProcess
         void cacheValues();
         void cacheLfo();
         void cacheMaxDownSample();
+
+        Decimator* _decimator;
 
         // ensures the pre- and post mix buffers match the appropriate amount of channels
         // and buffer size. this also clones the contents of given in buffer into the pre-mix buffer
