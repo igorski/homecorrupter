@@ -45,7 +45,6 @@ PluginProcess::PluginProcess( int amountOfChannels )
 
     bitCrusher = new BitCrusher( 1.f, .5f, 1.f );
     limiter    = new Limiter( 10.f, 500.f, .6f );
-    _decimator = new Decimator( 16, 1.f );
 
     // buffers will be lazily created in the process function as they correspond to the host buffer size
     _recordBuffer  = nullptr;
@@ -75,7 +74,6 @@ PluginProcess::~PluginProcess()
     delete[] _lastSamples;
     delete bitCrusher;
     delete limiter;
-    delete _decimator;
     delete _recordBuffer;
     delete _postMixBuffer;
     delete _preMixBuffer;

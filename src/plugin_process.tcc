@@ -28,8 +28,6 @@ template <typename SampleType>
 void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int numInChannels, int numOutChannels,
                              int bufferSize, uint32 sampleFramesSize ) {
 
-    float fBufferSize = ( float ) bufferSize;
-
     // input and output buffers can be float or double as defined
     // by the templates SampleType value. Internally we process
     // audio as floats
@@ -103,11 +101,10 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             s2 = channelRecordBuffer[ t2 ];
 
             float inSample   = ( s1 + ( s2 - s1 ) * frac );
-            // TODO: decimator accumulator should be per channel
-            float outSample  = _decimator->processSingle( inSample ) * .5;
+            float outSample  = inSample * .5;
 
             int start = i;
-            for ( l = std::min( fBufferSize, start + _sampleIncr ); i < l; ++i ) {
+            for ( l = std::min( bufferSize, start + _sampleIncr ); i < l; ++i ) {
 
                 r2 = r1;
                 r1 = rand();
@@ -128,7 +125,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                     float lfoValue = _downSampleLfo->peek() * .5f + .5f;
                     _tempDownSampleAmount = std::min( _downSampleLfoMax, _downSampleLfoMin + _downSampleLfoRange * lfoValue );
                     cacheValues();
-                    l = std::min( fBufferSize, start + _sampleIncr );
+                    l = std::min( bufferSize, start + _sampleIncr );
                 }
 
                 if ( _hasPlaybackRateLfo ) {

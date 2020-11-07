@@ -106,8 +106,6 @@ set(vst_sources
     src/audiobuffer.cpp
     src/bitcrusher.h
     src/bitcrusher.cpp
-    src/decimator.h
-    src/decimator.cpp
     src/lfo.h
     src/lfo.cpp
     src/limiter.h
