@@ -110,7 +110,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             float inSample   = lowPassFilter->applySingle( s1 + ( s2 - s1 ) * frac );
             float outSample  = inSample * .5;
 
-            int32 start = i;
+            int start = i;
             for ( l = std::min( bufferSize, start + _sampleIncr ); i < l; ++i ) {
 
                 r2 = r1;
