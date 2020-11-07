@@ -47,7 +47,8 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
     int recordMax = _maxRecordBufferSize - 1;
 
     int t, t2;
-    float incr, frac, s1, s2;
+    int maxT = bufferSize - 1;
+    float incr, frac, fracNext, s1, s2;
 
     // cache oscillator positions (are reset for each channel)
 
@@ -69,6 +70,8 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
         float* channelRecordBuffer   = _recordBuffer->getBufferForChannel( c );
         float* channelPreMixBuffer   = _preMixBuffer->getBufferForChannel( c );
 
+        LowPassFilter* lowPassFilter = _lowPassFilters.at( c );
+
         _downSampleLfo->setAccumulator( downSampleLfoAcc );
         _playbackRateLfo->setAccumulator( playbackRateLfoAcc );
 
@@ -89,18 +92,21 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
         while ( i < bufferSize ) {
             t  = ( int ) readPointer;
-            t2 = std::min( recordMax, t + 1 );
+            t2 = std::min( maxT, t + 1 );
 
-            // this fractionals is in the 0 - 1 range
+            // these fractional is in the 0 - 1 range
             // NOTE: we have uncommented readPointer (float) to use t (int)
             // as it is devilishly tasty when down sampling
 
-            frac = /*readPointer - t :*/ 0;
+            frac     = /*readPointer - t :*/ 0;
+            fracNext = /*readPointer */ t + 1 - t2;
 
             s1 = channelRecordBuffer[ t ];
             s2 = channelRecordBuffer[ t2 ];
 
-            float inSample   = ( s1 + ( s2 - s1 ) * frac );
+            // we apply a lowpass filter to prevent interpolation artefacts
+
+            float inSample   = lowPassFilter->applySingle( s1 + ( s2 - s1 ) * frac );
             float outSample  = inSample * .5;
 
             int start = i;
@@ -111,12 +117,13 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
                 float nextSample = outSample + lastSample;
 
-                // correct DC offset and apply dither
+                // write sample into the output buffer, corrected for DC offset and dither applied
 
                 channelPreMixBuffer[ i ] = nextSample + DITHER_DC_OFFSET + DITHER_AMPLITUDE * ( float )( r1 - r2 );
                 lastSample = nextSample * .25;
 
                 // update the increment in case the LFO's have updated the down sampling amount or playback rate
+
                 incr = ( float ) _sampleIncr * _tempPlaybackRate;
 
                 // run the oscillators, note we multiply by .5 and add .5 to make the LFO's bipolar waveforms unipolar
@@ -131,7 +138,6 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                 if ( _hasPlaybackRateLfo ) {
                     float lfoValue = _playbackRateLfo->peek() * .5f + .5f;
                     _tempPlaybackRate = std::min( _playbackRateLfoMax, _playbackRateLfoMin + _playbackRateLfoRange * lfoValue );
-                    cacheValues();
                 }
             }
 
@@ -141,6 +147,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
         }
 
         // apply bit crusher
+
         bitCrusher->process( channelPreMixBuffer, bufferSize );
 
         // mix the input and processed mix buffers into the output buffer
@@ -156,10 +163,10 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                 channelOutBuffer[ i ] += ( inSample * dryMix );
             }
         }
-
+        // update channel properties
         _lastSamples[ c ] = lastSample;
     }
-    // update indices
+    // update read/write indices
     _readPointer  = readPointer;
     _writePointer = writePointer;
 

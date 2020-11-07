@@ -36,6 +36,7 @@ PluginProcess::PluginProcess( int amountOfChannels )
 
     for ( int i = 0; i < amountOfChannels; ++i ) {
         _lastSamples[ i ] = 0.f;
+        _lowPassFilters.push_back( new LowPassFilter());
     }
 
     _dryMix = 0.f;
@@ -72,6 +73,12 @@ PluginProcess::PluginProcess( int amountOfChannels )
 PluginProcess::~PluginProcess()
 {
     delete[] _lastSamples;
+
+    while ( _lowPassFilters.size() > 0 ) {
+        delete _lowPassFilters.at( 0 );
+        _lowPassFilters.erase( _lowPassFilters.begin() );
+    }
+
     delete bitCrusher;
     delete limiter;
     delete _recordBuffer;
@@ -197,7 +204,13 @@ void PluginProcess::resetReadWritePointers()
 void PluginProcess::cacheValues()
 {
     _sampleIncr = std::max( 1, ( int ) floor( _tempDownSampleAmount ));
-    // should be  _sampleIncr = std::max( 1.f, _maxDownSample / ( abs( _tempDownSampleAmount - _maxDownSample ) + 1.f ));
+
+    // update the lowpass filters to the appropriate cutoff
+
+    float ratio = 1.f + ( _tempDownSampleAmount / _maxDownSample );
+    for ( int c = 0; c < _amountOfChannels; ++c ) {
+        _lowPassFilters.at( c )->setRatio( ratio );
+    }
 }
 
 void PluginProcess::cacheLfo()

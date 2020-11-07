@@ -27,6 +27,7 @@
 #include "audiobuffer.h"
 #include "bitcrusher.h"
 #include "limiter.h"
+#include "lowpassfilter.h"
 #include <vector>
 
 using namespace Steinberg;
@@ -99,6 +100,8 @@ class PluginProcess
         void cacheValues();
         void cacheLfo();
         void cacheMaxDownSample();
+
+        std::vector<LowPassFilter*> _lowPassFilters;
 
         // ensures the pre- and post mix buffers match the appropriate amount of channels
         // and buffer size. this also clones the contents of given in buffer into the pre-mix buffer

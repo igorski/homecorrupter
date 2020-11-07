@@ -3,6 +3,7 @@
 
 #include "pluginterfaces/base/fplatform.h"
 #include "pluginterfaces/base/funknown.h"
+#include <math.h>
 
 using namespace Steinberg;
 
@@ -13,15 +14,17 @@ namespace VST {
     static const char* NAME     = "Homecorrupter";
     static const char* VENDOR   = "igorski.nl";
 
-    // generate unique UIDs for these
-    static const FUID PluginProcessorUID( 0xD9995465, 0xFFF74B54, 0xA6AFDDE5, 0x9A615AD3 );
-    static const FUID PluginWithSideChainProcessorUID( 0x528F457D, 0xBA31BDFB, 0x70A7A2DA, 0x31C358F3 );
-    static const FUID PluginControllerUID( 0xCF48474A, 0xB7E202CD, 0x66D160D9, 0xF99D622B );
+    // generate unique UIDs for these (www.uuidgenerator.net is great for this)
+
+    static const FUID PluginProcessorUID( 0xC0AFA4D6, 0x749F464F, 0xB499A21C, 0x0E48FFA8 );
+    static const FUID PluginWithSideChainProcessorUID( 0x749F464F, 0xB499A21C, 0x0E48FFA8, 0xC0AFA4D6 );
+    static const FUID PluginControllerUID( 0xB499A21C, 0x0E48FFA8, 0xC0AFA4D6, 0x749F464F );
 
     extern float SAMPLE_RATE; // set upon initialization, see vst.cpp
 
-    static const float PI     = 3.141592653589793f;
-    static const float TWO_PI = PI * 2.f;
+    static const float PI       = 3.141592653589793f;
+    static const float TWO_PI   = PI * 2.f;
+    static const float SQRT_TWO = sqrt( 2 );
 
     // maximum and minimum rate of oscillation in Hz
     // also see plugin.uidesc to update the controls to match
