@@ -50,7 +50,6 @@ PluginProcess::PluginProcess( int amountOfChannels )
     // buffers will be lazily created in the process function as they correspond to the host buffer size
     _recordBuffer  = nullptr;
     _preMixBuffer  = nullptr;
-    _postMixBuffer = nullptr;
 
     // oscillators
     _downSampleLfo      = new LFO();
@@ -82,7 +81,6 @@ PluginProcess::~PluginProcess()
     delete bitCrusher;
     delete limiter;
     delete _recordBuffer;
-    delete _postMixBuffer;
     delete _preMixBuffer;
     delete _downSampleLfo;
     delete _playbackRateLfo;

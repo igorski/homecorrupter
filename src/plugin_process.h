@@ -37,6 +37,8 @@ class PluginProcess
 {
     const float MIN_PLAYBACK_SPEED = .5f;
 
+    // dithering constants
+
     const float DITHER_WORD_LENGTH = pow( 2.0, 15 );        // 15 implies 16-bit depth
     const float DITHER_WI          = 1.0f / DITHER_WORD_LENGTH;
     const float DITHER_DC_OFFSET   = DITHER_WI * 0.5f;      // apply in resampling routine to remove DC offset
@@ -59,49 +61,61 @@ class PluginProcess
         void setPlaybackRateLfo( float LFORatePercentage, float LFODepth );
         void setDryMix( float value );
         void setWetMix( float value );
-        void resetReadWritePointers();
+        void resetReadWritePointers(); // invoke on host sequencer start
 
         BitCrusher* bitCrusher;
-        Limiter* limiter;
+        Limiter*    limiter;
+
+    private:
+        AudioBuffer* _recordBuffer; // buffer used to record incoming signal
+        AudioBuffer* _preMixBuffer; // buffer used for the pre-effect mixing
+
+        float _dryMix;
+        float _wetMix;
+        int _amountOfChannels;
+        std::vector<LowPassFilter*> _lowPassFilters;
+
+        // read/write pointers for the record buffer used for record and playback
+
+        float _readPointer;
+        int _writePointer;
+        int _maxRecordBufferSize;
+
+        // down sampling
+
+        float  _downSampleAmount;
+        float  _tempDownSampleAmount;
+        float  _maxDownSample;
+        float* _lastSamples; // last written sample, per channel
+
+        // clock speed
+
+        float _playbackRate;
+        float _tempPlaybackRate;
+        int   _sampleIncr;
+
+        // oscillators
 
         LFO* _downSampleLfo;
         LFO* _playbackRateLfo;
 
-    private:
-        AudioBuffer* _recordBuffer;   // buffer used to record incoming signal
-        AudioBuffer* _preMixBuffer;   // buffer used for the pre-delay effect mixing
-        AudioBuffer* _postMixBuffer;  // buffer used for the post-delay effect mixing
-        float _readPointer;           // where to read from in the record buffer
-        int _writePointer;            // where to write into the record buffer
-        int _maxRecordBufferSize;
-
-        float _dryMix;
-        float _wetMix;
-        float _downSampleAmount;
-        float _tempDownSampleAmount;
-        float _playbackRate;
-        float _tempPlaybackRate;
-        int _sampleIncr;
-        int _amountOfChannels;
-        float _maxDownSample;
-        float* _lastSamples;
-
-        bool _hasDownSampleLfo;
+        bool  _hasDownSampleLfo;
         float _downSampleLfoDepth;
         float _downSampleLfoRange;
         float _downSampleLfoMax;
         float _downSampleLfoMin;
-        bool _hasPlaybackRateLfo;
+
+        bool  _hasPlaybackRateLfo;
         float _playbackRateLfoDepth;
         float _playbackRateLfoRange;
         float _playbackRateLfoMax;
         float _playbackRateLfoMin;
 
+        // caching of values
+
         void cacheValues();
         void cacheLfo();
         void cacheMaxDownSample();
-
-        std::vector<LowPassFilter*> _lowPassFilters;
 
         // ensures the pre- and post mix buffers match the appropriate amount of channels
         // and buffer size. this also clones the contents of given in buffer into the pre-mix buffer

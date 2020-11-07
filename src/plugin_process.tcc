@@ -33,7 +33,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
     // audio as floats
 
     SampleType inSample;
-    int i, l;
+    int32 i, l;
 
     bool mixDry = _dryMix != 0.f;
 
@@ -46,16 +46,18 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
     int writePointer;
     int recordMax = _maxRecordBufferSize - 1;
 
-    int t, t2;
-    int maxT = bufferSize - 1;
-    float incr, frac, fracNext, s1, s2;
+    // temp variables for clock speed
 
-    // cache oscillator positions (are reset for each channel)
+    int t, t2;
+    float incr, frac, s1, s2;
+    int maxBufferPos = bufferSize - 1;
+
+    // cache oscillator positions (are reset for each channel where the last iteration is saved)
 
     float downSampleLfoAcc   = _downSampleLfo->getAccumulator();
     float playbackRateLfoAcc = _playbackRateLfo->getAccumulator();
 
-    // dithering variables
+    // temp variables for dithering
 
     int r1 = 0;
     int r2 = 0;
@@ -92,14 +94,13 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
         while ( i < bufferSize ) {
             t  = ( int ) readPointer;
-            t2 = std::min( maxT, t + 1 );
+            t2 = std::min( maxBufferPos, t + 1 );
 
             // these fractional is in the 0 - 1 range
             // NOTE: we have uncommented readPointer (float) to use t (int)
             // as it is devilishly tasty when down sampling
 
-            frac     = /*readPointer - t :*/ 0;
-            fracNext = /*readPointer */ t + 1 - t2;
+            frac = /*readPointer - t :*/ 0;
 
             s1 = channelRecordBuffer[ t ];
             s2 = channelRecordBuffer[ t2 ];
@@ -109,7 +110,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             float inSample   = lowPassFilter->applySingle( s1 + ( s2 - s1 ) * frac );
             float outSample  = inSample * .5;
 
-            int start = i;
+            int32 start = i;
             for ( l = std::min( bufferSize, start + _sampleIncr ); i < l; ++i ) {
 
                 r2 = r1;
@@ -153,12 +154,18 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
         // mix the input and processed mix buffers into the output buffer
 
         for ( i = 0; i < bufferSize; ++i ) {
+
             // wet mix (e.g. the effected signal)
+
             channelOutBuffer[ i ] = ( SampleType ) channelPreMixBuffer[ i ] * wetMix;
+
             // dry mix (e.g. mix in the input signal)
+
             if ( mixDry ) {
+
                 // before writing to the out buffer we take a snapshot of the current in sample
                 // value as VST2 in Ableton Live supplies the same buffer for in and out!
+
                 inSample = channelInBuffer[ i ];
                 channelOutBuffer[ i ] += ( inSample * dryMix );
             }
