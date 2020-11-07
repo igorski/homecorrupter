@@ -27,7 +27,8 @@
 
 namespace Igorski {
 
-PluginProcess::PluginProcess( int amountOfChannels ) {
+PluginProcess::PluginProcess( int amountOfChannels )
+{
     _amountOfChannels = amountOfChannels;
     cacheMaxDownSample();
 
@@ -35,6 +36,7 @@ PluginProcess::PluginProcess( int amountOfChannels ) {
 
     for ( int i = 0; i < amountOfChannels; ++i ) {
         _lastSamples[ i ] = 0.f;
+        _lowPassFilters.push_back( new LowPassFilter());
     }
 
     _dryMix = 0.f;
@@ -68,8 +70,15 @@ PluginProcess::PluginProcess( int amountOfChannels ) {
     setPlaybackRate( _tempPlaybackRate );
 }
 
-PluginProcess::~PluginProcess() {
+PluginProcess::~PluginProcess()
+{
     delete[] _lastSamples;
+
+    while ( _lowPassFilters.size() > 0 ) {
+        delete _lowPassFilters.at( 0 );
+        _lowPassFilters.erase( _lowPassFilters.begin() );
+    }
+
     delete bitCrusher;
     delete limiter;
     delete _recordBuffer;
@@ -81,15 +90,18 @@ PluginProcess::~PluginProcess() {
 
 /* setters */
 
-void PluginProcess::setDryMix( float value ) {
+void PluginProcess::setDryMix( float value )
+{
     _dryMix = value;
 }
 
-void PluginProcess::setWetMix( float value ) {
+void PluginProcess::setWetMix( float value )
+{
     _wetMix = value;
 }
 
-void PluginProcess::setResampleRate( float value ) {
+void PluginProcess::setResampleRate( float value )
+{
     // invert the sampling rate value to determine the down sampling value
     float downSampleValue = abs( value - 1.f );
 
@@ -109,7 +121,8 @@ void PluginProcess::setResampleRate( float value ) {
     cacheValues();
 }
 
-void PluginProcess::setResampleLfo( float LFORatePercentage, float LFODepth ) {
+void PluginProcess::setResampleLfo( float LFORatePercentage, float LFODepth )
+{
     bool wasEnabled = _hasDownSampleLfo;
     bool enabled    = LFORatePercentage > 0.f;
 
@@ -136,7 +149,8 @@ void PluginProcess::setResampleLfo( float LFORatePercentage, float LFODepth ) {
     }
 }
 
-void PluginProcess::setPlaybackRate( float value ) {
+void PluginProcess::setPlaybackRate( float value )
+{
     float tempRatio = _tempPlaybackRate / std::max( 0.000000001f, _playbackRate );
 
     // rate is in 0 - 1 range, playback rate speed support is between 0.5 (half speed) - 1.0f (full speed)
@@ -151,7 +165,8 @@ void PluginProcess::setPlaybackRate( float value ) {
     cacheValues();
 }
 
-void PluginProcess::setPlaybackRateLfo( float LFORatePercentage, float LFODepth ) {
+void PluginProcess::setPlaybackRateLfo( float LFORatePercentage, float LFODepth )
+{
     bool wasEnabled = _hasPlaybackRateLfo;
     bool enabled    = LFORatePercentage > 0.f;
 
@@ -178,18 +193,28 @@ void PluginProcess::setPlaybackRateLfo( float LFORatePercentage, float LFODepth 
     }
 }
 
-void PluginProcess::resetReadWritePointers() {
+void PluginProcess::resetReadWritePointers()
+{
     _readPointer  = 0.f;
     _writePointer = 0;
 }
 
 /* private methods */
 
-void PluginProcess::cacheValues() {
+void PluginProcess::cacheValues()
+{
     _sampleIncr = std::max( 1, ( int ) floor( _tempDownSampleAmount ));
+
+    // update the lowpass filters to the appropriate cutoff
+
+    float ratio = 1.f + ( _tempDownSampleAmount / _maxDownSample );
+    for ( int c = 0; c < _amountOfChannels; ++c ) {
+        _lowPassFilters.at( c )->setRatio( ratio );
+    }
 }
 
-void PluginProcess::cacheLfo() {
+void PluginProcess::cacheLfo()
+{
     _downSampleLfoRange = _downSampleAmount * _downSampleLfoDepth;
     // note down sampling is not in 0 - 1 range but rather 0 - _maxDownSample which is the max tolerated value for LfoMax
     _downSampleLfoMax   = std::min( _maxDownSample, _downSampleAmount + _downSampleLfoRange / 2.f );
