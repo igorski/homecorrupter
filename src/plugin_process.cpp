@@ -225,7 +225,8 @@ void PluginProcess::cacheLfo()
     _playbackRateLfoMin   = std::max( 0.f, _playbackRate - _playbackRateLfoRange / 2.f );
 }
 
-void PluginProcess::cacheMaxDownSample() {
+void PluginProcess::cacheMaxDownSample()
+{
     // we allow downsampling all the way down to 1 kHz
     _maxDownSample = VST::SAMPLE_RATE / 1000.f;
 }
