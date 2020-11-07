@@ -116,7 +116,7 @@ void PluginProcess::setResampleRate( float value )
     _tempDownSampleAmount = _hasDownSampleLfo ? _downSampleAmount * tempRatio : _downSampleAmount;
 
     cacheLfo();
-    cacheValues();
+    cacheDownSamplingValues();
 }
 
 void PluginProcess::setResampleLfo( float LFORatePercentage, float LFODepth )
@@ -138,7 +138,7 @@ void PluginProcess::setResampleLfo( float LFORatePercentage, float LFODepth )
     // turning LFO off
     if ( !_hasDownSampleLfo && wasEnabled ) {
         _tempDownSampleAmount = _downSampleAmount;
-        cacheValues();
+        cacheDownSamplingValues();
     }
 
     if ( hadChange ) {
@@ -160,7 +160,6 @@ void PluginProcess::setPlaybackRate( float value )
     _tempPlaybackRate = _hasPlaybackRateLfo ? _playbackRate * tempRatio : _playbackRate;
 
     cacheLfo();
-    cacheValues();
 }
 
 void PluginProcess::setPlaybackRateLfo( float LFORatePercentage, float LFODepth )
@@ -182,7 +181,6 @@ void PluginProcess::setPlaybackRateLfo( float LFORatePercentage, float LFODepth 
     // turning LFO off
     if ( !_hasPlaybackRateLfo && wasEnabled ) {
         _tempPlaybackRate = _playbackRate;
-        cacheValues();
     }
 
     if ( hadChange ) {
@@ -199,7 +197,7 @@ void PluginProcess::resetReadWritePointers()
 
 /* private methods */
 
-void PluginProcess::cacheValues()
+void PluginProcess::cacheDownSamplingValues()
 {
     _sampleIncr = std::max( 1, ( int ) floor( _tempDownSampleAmount ));
 

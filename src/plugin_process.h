@@ -114,7 +114,7 @@ class PluginProcess
 
         // caching of values
 
-        void cacheValues();
+        void cacheDownSamplingValues();
         void cacheLfo();
         void cacheMaxDownSample();
 

@@ -132,7 +132,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                 if ( _hasDownSampleLfo ) {
                     float lfoValue = _downSampleLfo->peek() * .5f + .5f;
                     _tempDownSampleAmount = std::min( _downSampleLfoMax, _downSampleLfoMin + _downSampleLfoRange * lfoValue );
-                    cacheValues();
+                    cacheDownSamplingValues();
                     l = std::min( bufferSize, start + _sampleIncr );
                 }
 
