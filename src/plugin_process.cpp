@@ -225,8 +225,7 @@ void PluginProcess::cacheLfo()
 
 void PluginProcess::cacheMaxDownSample()
 {
-    // we allow downsampling all the way down to 1 kHz
-    _maxDownSample = VST::SAMPLE_RATE / 1000.f;
+    _maxDownSample = VST::SAMPLE_RATE / MIN_SAMPLE_RATE;
 }
 
 }

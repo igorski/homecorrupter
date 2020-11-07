@@ -33,8 +33,7 @@ const MODEL = [
         unitDescr: '%',
         value: { min: '0.f', max: '1.f', def: '1.f', type: 'percent' },
         ui: { x: 292, y: 196, w: 134, h: 21 },
-        // note 1000 Hz is minimum sample rate (see plugin_process.cpp)
-        customDescr: 'sprintf( text, "%.2d Hz", ( int ) (( Igorski::VST::SAMPLE_RATE - 1000.f ) * valueNormalized ) + 1000 );'
+        customDescr: 'sprintf( text, "%.2d Hz", ( int ) (( Igorski::VST::SAMPLE_RATE - Igorski::PluginProcess::MIN_SAMPLE_RATE ) * valueNormalized ) + ( int ) Igorski::PluginProcess::MIN_SAMPLE_RATE );'
     },
     {
         name: 'bitDepth',
@@ -43,14 +42,15 @@ const MODEL = [
         value: { min: '0.f', max: '1.f', def: '1.f', type: 'percent' },
         ui: { x: 292, y: 272, w: 134, h: 21 },
         // note we treat full resolution as 16-bits (but is in fact whatever host is)
-        customDescr: 'sprintf( text, "%.2d Bits", ( int ) ( 15 * valueNormalized ) + 1 );'
+        customDescr: 'sprintf( text, "%.d Bits", ( int ) ( 15 * valueNormalized ) + 1 );'
     },
     {
         name: 'playbackRate',
         descr: 'Playback rate',
         unitDescr: '%',
         value: { min: '0.f', max: '1.f', def: '1.f', type: 'percent' },
-        ui: { x: 292, y: 346, w: 134, h: 21 }
+        ui: { x: 292, y: 346, w: 134, h: 21 },
+        customDescr: 'sprintf( text, "%.2d %%", ( int ) (( valueNormalized * ( 100.f * Igorski::PluginProcess::MIN_PLAYBACK_SPEED )) + ( Igorski::PluginProcess::MIN_PLAYBACK_SPEED * 100 )));'
     },
     // LFO (note constants for min/max defined in global.h)
     {

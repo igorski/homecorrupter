@@ -21,6 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include "../global.h"
+#include "../plugin_process.h"
 #include "controller.h"
 #include "uimessagecontroller.h"
 #include "../paramids.h"
@@ -362,17 +363,17 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
 // --- AUTO-GENERATED GETPARAM START
 
         case kResampleRateId:
-            sprintf( text, "%.2d Hz", ( int ) (( Igorski::VST::SAMPLE_RATE - 1000.f ) * valueNormalized ) + 1000 );
+            sprintf( text, "%.2d Hz", ( int ) (( Igorski::VST::SAMPLE_RATE - Igorski::PluginProcess::MIN_SAMPLE_RATE ) * valueNormalized ) + ( int ) Igorski::PluginProcess::MIN_SAMPLE_RATE );
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kBitDepthId:
-            sprintf( text, "%.2d Bits", ( int ) ( 15 * valueNormalized ) + 1 );
+            sprintf( text, "%.d Bits", ( int ) ( 15 * valueNormalized ) + 1 );
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kPlaybackRateId:
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            sprintf( text, "%.2d %%", ( int ) (( valueNormalized * ( 100.f * Igorski::PluginProcess::MIN_PLAYBACK_SPEED )) + ( Igorski::PluginProcess::MIN_PLAYBACK_SPEED * 100 )));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 

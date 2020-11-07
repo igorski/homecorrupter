@@ -35,8 +35,6 @@ using namespace Steinberg;
 namespace Igorski {
 class PluginProcess
 {
-    const float MIN_PLAYBACK_SPEED = .5f;
-
     // dithering constants
 
     const float DITHER_WORD_LENGTH = pow( 2.0, 15 );        // 15 implies 16-bit depth
@@ -45,6 +43,9 @@ class PluginProcess
     const float DITHER_AMPLITUDE   = DITHER_WI / RAND_MAX;  // 2 LSB
 
     public:
+        static constexpr float MIN_PLAYBACK_SPEED = .5f;
+        static constexpr float MIN_SAMPLE_RATE    = 1000.f;
+
         PluginProcess( int amountOfChannels );
         ~PluginProcess();
 
