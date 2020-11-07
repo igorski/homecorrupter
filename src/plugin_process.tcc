@@ -96,9 +96,9 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             t  = ( int ) readPointer;
             t2 = std::min( maxBufferPos, t + 1 );
 
-            // these fractional is in the 0 - 1 range
-            // NOTE: we have uncommented readPointer (float) to use t (int)
-            // as it is devilishly tasty when down sampling
+            // this fractional is in the 0 - 1 range
+            // NOTE: we have uncommented this calculation
+            // as the result is devilishly tasty when down sampling
 
             frac = /*readPointer - t :*/ 0;
 
@@ -155,6 +155,11 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
         for ( i = 0; i < bufferSize; ++i ) {
 
+            // before writing to the out buffer we take a snapshot of the current in sample
+            // value as VST2 in Ableton Live supplies the same buffer for inBuffer and outBuffer!
+
+            inSample = channelInBuffer[ i ];
+
             // wet mix (e.g. the effected signal)
 
             channelOutBuffer[ i ] = ( SampleType ) channelPreMixBuffer[ i ] * wetMix;
@@ -162,11 +167,6 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             // dry mix (e.g. mix in the input signal)
 
             if ( mixDry ) {
-
-                // before writing to the out buffer we take a snapshot of the current in sample
-                // value as VST2 in Ableton Live supplies the same buffer for in and out!
-
-                inSample = channelInBuffer[ i ];
                 channelOutBuffer[ i ] += ( inSample * dryMix );
             }
         }
