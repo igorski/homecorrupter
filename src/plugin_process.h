@@ -43,8 +43,9 @@ class PluginProcess
     const float DITHER_AMPLITUDE   = DITHER_WI / RAND_MAX;  // 2 LSB
 
     public:
+        static constexpr float MAX_RECORD_SECONDS = 30.f;
         static constexpr float MIN_PLAYBACK_SPEED = .5f;
-        static constexpr float MIN_SAMPLE_RATE    = 1000.f;
+        static constexpr float MIN_SAMPLE_RATE    = 2000.f;
 
         PluginProcess( int amountOfChannels );
         ~PluginProcess();
@@ -63,6 +64,7 @@ class PluginProcess
         void setDryMix( float value );
         void setWetMix( float value );
         void resetReadWritePointers(); // invoke on host sequencer start
+        void clearBuffer();            // flushes record buffer
 
         BitCrusher* bitCrusher;
         Limiter*    limiter;
@@ -84,18 +86,19 @@ class PluginProcess
 
         // down sampling
 
-        float  _downSampleAmount;
-        float  _tempDownSampleAmount;
+        float  _downSampleAmount; // 1 == no change (keeps at original sample rate), > 1 provides down sampling
+        float  _actualDownSampleAmount;
         float  _maxDownSample;
         float* _lastSamples; // last written sample, per channel
 
         // clock speed
 
-        float _playbackRate;
-        float _tempPlaybackRate;
+        float _playbackRate;  // 1 == 100% (no change), < 1 is lower playback speed
+        float _actualPlaybackRate;
+        float _fSampleIncr;
         int   _sampleIncr;
 
-        // oscillators
+        // oscillators (set the "actual"downSampleAmount|playbackRate values relative to the values provided to the setters)
 
         LFO* _downSampleLfo;
         LFO* _playbackRateLfo;
@@ -117,6 +120,17 @@ class PluginProcess
         void cacheDownSamplingValues();
         void cacheLfo();
         void cacheMaxDownSample();
+
+        void setActualDownSampling( float value );
+        void setActualPlaybackRate( float value );
+
+        inline bool isSlowedDown() {
+            return _actualPlaybackRate < 1.f;
+        }
+
+        inline bool isDownSampled() {
+            return _actualDownSampleAmount > 1.f;
+        }
 
         // ensures the pre- and post mix buffers match the appropriate amount of channels
         // and buffer size. this also clones the contents of given in buffer into the pre-mix buffer

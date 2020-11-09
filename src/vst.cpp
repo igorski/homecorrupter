@@ -192,14 +192,25 @@ tresult PLUGIN_API Homecorrupter::process( ProcessData& data )
 
     // according to docs: processing context (optional, but most welcome)
 
-    if ( data.processContext != nullptr ) {
+    if ( data.processContext != nullptr )
+    {
         bool wasPlaying = isPlaying;
 
         // when host starts sequencer, ensure the process read pointer and write pointers are reset
+
         isPlaying = data.processContext->state & ProcessContext::kPlaying;
-        if (!wasPlaying && isPlaying) {
+
+        if ( !wasPlaying && isPlaying ) {
             pluginProcess->resetReadWritePointers();
         }
+
+        // clear the record buffers on sequencer start / stop to prevent slowed down playback from
+        // reading old data that has been recorded into its "future"
+
+        if ( wasPlaying != isPlaying ) {
+            pluginProcess->clearBuffer();
+        }
+
         // in case you want to do tempo synchronization with the host
         /*
         pluginProcess->setTempo(
@@ -471,8 +482,9 @@ tresult PLUGIN_API Homecorrupter::setupProcessing( ProcessSetup& newSetup )
 
     // spotted to fire multiple times...
 
-    if ( pluginProcess != nullptr )
+    if ( pluginProcess != nullptr ) {
         delete pluginProcess;
+    }
 
     // TODO: creating a bunch of extra channels for no apparent reason?
     // get the correct channel amount and don't allocate more than necessary...
@@ -583,7 +595,11 @@ void Homecorrupter::syncModel()
     pluginProcess->setPlaybackRate( fPlaybackRate );
 
     // note we attenuate the signal at lower bit depths as the dynamic range decreases and volume builds up
-    pluginProcess->bitCrusher->setOutputMix( fBitDepth > .3f ? 1.f : .4f );
+    if ( fBitDepth == 1.f ) {
+        pluginProcess->bitCrusher->setOutputMix( 1.f );
+    } else {
+        pluginProcess->bitCrusher->setOutputMix( fBitDepth > .4f ? 1.25f : .25f );
+    }
 
     // oscillators
     pluginProcess->setResampleLfo( fResampleLfo, fResampleLfoDepth );

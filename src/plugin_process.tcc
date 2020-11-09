@@ -21,6 +21,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include <algorithm>
+#include "calc.h"
 
 namespace Igorski
 {
@@ -44,18 +45,21 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
     float readPointer;
     int writePointer;
-    int recordMax = _maxRecordBufferSize - 1;
-
-    // temp variables for clock speed
+    int recordMax = _maxRecordBufferSize - 1; // never record beyond the record buffer size (duh...)
 
     int t, t2;
     float incr, frac, s1, s2;
-    int maxBufferPos = bufferSize - 1;
+
+    int maxBufferPos  = bufferSize - 1;
+    int maxReadOffset = _writePointer + maxBufferPos; // never read beyond the range of the current incoming input
+
+    float curSample, nextSample, outSample;
 
     // cache oscillator positions (are reset for each channel where the last iteration is saved)
 
     float downSampleLfoAcc   = _downSampleLfo->getAccumulator();
     float playbackRateLfoAcc = _playbackRateLfo->getAccumulator();
+    float lfoValue;
 
     // temp variables for dithering
 
@@ -94,7 +98,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
         while ( i < bufferSize ) {
             t  = ( int ) readPointer;
-            t2 = std::min( maxBufferPos, t + 1 );
+            t2 = std::min( recordMax, t + _sampleIncr );
 
             // this fractional is in the 0 - 1 range
             // NOTE: we have uncommented this calculation
@@ -107,43 +111,40 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
             // we apply a lowpass filter to prevent interpolation artefacts
 
-            float inSample   = lowPassFilter->applySingle( s1 + ( s2 - s1 ) * frac );
-            float outSample  = inSample * .5;
+            curSample = lowPassFilter->applySingle( s1 + ( s2 - s1 ) * frac );
+            outSample = curSample * .5;
 
             int start = i;
             for ( l = std::min( bufferSize, start + _sampleIncr ); i < l; ++i ) {
-
                 r2 = r1;
                 r1 = rand();
 
-                float nextSample = outSample + lastSample;
-
-                // write sample into the output buffer, corrected for DC offset and dither applied
-
-                channelPreMixBuffer[ i ] = nextSample + DITHER_DC_OFFSET + DITHER_AMPLITUDE * ( float )( r1 - r2 );
+                nextSample = outSample + lastSample;
                 lastSample = nextSample * .25;
 
-                // update the increment in case the LFO's have updated the down sampling amount or playback rate
+                // write sample into the output buffer, corrected for DC offset and dithering applied
 
-                incr = ( float ) _sampleIncr * _tempPlaybackRate;
+                channelPreMixBuffer[ i ] = nextSample + DITHER_DC_OFFSET + DITHER_AMPLITUDE * ( float )( r1 - r2 );
 
                 // run the oscillators, note we multiply by .5 and add .5 to make the LFO's bipolar waveforms unipolar
 
                 if ( _hasDownSampleLfo ) {
-                    float lfoValue = _downSampleLfo->peek() * .5f + .5f;
-                    _tempDownSampleAmount = std::min( _downSampleLfoMax, _downSampleLfoMin + _downSampleLfoRange * lfoValue );
-                    cacheDownSamplingValues();
+                    lfoValue = _downSampleLfo->peek() * .5f + .5f;
+                    setActualDownSampling( std::min( _downSampleLfoMax, _downSampleLfoMin + _downSampleLfoRange * lfoValue ) * _maxDownSample );
                     l = std::min( bufferSize, start + _sampleIncr );
                 }
 
                 if ( _hasPlaybackRateLfo ) {
-                    float lfoValue = _playbackRateLfo->peek() * .5f + .5f;
-                    _tempPlaybackRate = std::min( _playbackRateLfoMax, _playbackRateLfoMin + _playbackRateLfoRange * lfoValue );
+                    lfoValue = _playbackRateLfo->peek() * .5f + .5f;
+                    setActualPlaybackRate( std::min( _playbackRateLfoMax, _playbackRateLfoMin + _playbackRateLfoRange * lfoValue ));
                 }
             }
 
-            if (( readPointer += incr ) > recordMax ) {
-                readPointer = 0.f;
+            // note we cannot cache the increment value as its parts are altered by the oscillators in the render cycle above
+            incr = _fSampleIncr * _actualPlaybackRate;
+
+            if (( readPointer += incr ) > maxReadOffset ) {
+                readPointer = ( float ) _writePointer; // don't go to 0.f but align with current write offset to play "current audio"
             }
         }
 
@@ -187,7 +188,9 @@ void PluginProcess::prepareMixBuffers( SampleType** inBuffer, int numInChannels,
     // if the record buffer wasn't created yet or the buffer size has changed
     // delete existing buffer and create new one to match properties
 
-    int recordSize = bufferSize * ( int ) ( _maxDownSample / MIN_PLAYBACK_SPEED );
+    int idealRecordSize = Calc::secondsToBuffer( MAX_RECORD_SECONDS );
+    int recordSize      = idealRecordSize + idealRecordSize % bufferSize;
+
     if ( _recordBuffer == nullptr || _recordBuffer->bufferSize != recordSize ) {
         delete _recordBuffer;
         _recordBuffer = new AudioBuffer( numInChannels, recordSize );

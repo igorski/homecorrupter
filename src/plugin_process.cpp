@@ -59,14 +59,16 @@ PluginProcess::PluginProcess( int amountOfChannels )
 
     // read / write variables
 
-    _readPointer  = 0;
+    _readPointer  = 0.f;
     _writePointer = 0;
 
-    _tempDownSampleAmount = 0.f; // max sampleRate (1.f) is 0.f down sampling
-    _tempPlaybackRate     = 1.f;
+    _downSampleAmount       = 0.f;
+    _actualDownSampleAmount = 1.f;
+    _playbackRate           = 0.f;
+    _actualPlaybackRate     = 1.f;
 
-    setResampleRate( 1.f );
-    setPlaybackRate( _tempPlaybackRate );
+    setResampleRate( _actualDownSampleAmount);
+    setPlaybackRate( _actualPlaybackRate );
 }
 
 PluginProcess::~PluginProcess()
@@ -102,21 +104,23 @@ void PluginProcess::setResampleRate( float value )
 {
     // invert the sampling rate value to determine the down sampling value
     float downSampleValue = abs( value - 1.f );
+    float scaledAmount    = Calc::scale( downSampleValue, 1.f, _maxDownSample - 1.f ) + 1.f;
 
-    float tempRatio = _tempDownSampleAmount / std::max( 0.000000001f, _downSampleAmount );
-    float scaledAmount = Calc::scale( downSampleValue, 1.f, _maxDownSample - 1.f ) + 1.f;
-
-    if ( scaledAmount != _downSampleAmount && _recordBuffer != nullptr ) {
-        float ratio  = scaledAmount / _downSampleAmount;
-        _readPointer = std::max( 0.f, std::min(( float ) _recordBuffer->bufferSize - 1.f, ( float ) _writePointer * ratio ));
+    if ( scaledAmount == _downSampleAmount ) {
+        return; // don't trigger changes if value is the same
     }
+//    else if ( _recordBuffer != nullptr ) {
+//        float ratio  = scaledAmount / _downSampleAmount;
+//        _readPointer = std::max( 0.f, std::min(( float ) _recordBuffer->bufferSize - 1.f, ( float ) _writePointer * ratio ));
+//    }
+
+    float tempRatio = _actualDownSampleAmount / std::max( 0.000000001f, _downSampleAmount );
+
     _downSampleAmount = scaledAmount;
 
     // in case down sampling is attached to oscillator, keep relative offset of currently moving wave in place
-    _tempDownSampleAmount = _hasDownSampleLfo ? _downSampleAmount * tempRatio : _downSampleAmount;
-
+    setActualDownSampling( _hasDownSampleLfo ? _downSampleAmount * tempRatio : _downSampleAmount );
     cacheLfo();
-    cacheDownSamplingValues();
 }
 
 void PluginProcess::setResampleLfo( float LFORatePercentage, float LFODepth )
@@ -137,7 +141,7 @@ void PluginProcess::setResampleLfo( float LFORatePercentage, float LFODepth )
 
     // turning LFO off
     if ( !_hasDownSampleLfo && wasEnabled ) {
-        _tempDownSampleAmount = _downSampleAmount;
+        _actualDownSampleAmount = _downSampleAmount;
         cacheDownSamplingValues();
     }
 
@@ -149,15 +153,19 @@ void PluginProcess::setResampleLfo( float LFORatePercentage, float LFODepth )
 
 void PluginProcess::setPlaybackRate( float value )
 {
-    float tempRatio = _tempPlaybackRate / std::max( 0.000000001f, _playbackRate );
+    float tempRatio = _actualPlaybackRate / std::max( 0.000000001f, _playbackRate );
 
     // rate is in 0 - 1 range, playback rate speed support is between 0.5 (half speed) - 1.0f (full speed)
     float scaledAmount = Calc::scale( value, 1, MIN_PLAYBACK_SPEED ) + MIN_PLAYBACK_SPEED;
 
+    if ( scaledAmount == _playbackRate ) {
+        return; // don't trigger changes if value is the same
+    }
+
     _playbackRate = scaledAmount;
 
     // in case playback rate is attached to oscillator, keep relative offset of currently moving wave in place
-    _tempPlaybackRate = _hasPlaybackRateLfo ? _playbackRate * tempRatio : _playbackRate;
+    setActualPlaybackRate( _hasPlaybackRateLfo ? _playbackRate * tempRatio : _playbackRate );
 
     cacheLfo();
 }
@@ -180,7 +188,7 @@ void PluginProcess::setPlaybackRateLfo( float LFORatePercentage, float LFODepth 
 
     // turning LFO off
     if ( !_hasPlaybackRateLfo && wasEnabled ) {
-        _tempPlaybackRate = _playbackRate;
+        _actualPlaybackRate = _playbackRate;
     }
 
     if ( hadChange ) {
@@ -195,15 +203,23 @@ void PluginProcess::resetReadWritePointers()
     _writePointer = 0;
 }
 
+void PluginProcess::clearBuffer()
+{
+    if ( _recordBuffer != nullptr ) {
+        _recordBuffer->silenceBuffers();
+    }
+}
+
 /* private methods */
 
 void PluginProcess::cacheDownSamplingValues()
 {
-    _sampleIncr = std::max( 1, ( int ) floor( _tempDownSampleAmount ));
+    _fSampleIncr = std::max( 1.f, floor( _actualDownSampleAmount ));
+    _sampleIncr  = ( int ) _fSampleIncr;
 
     // update the lowpass filters to the appropriate cutoff
 
-    float ratio = 1.f + ( _tempDownSampleAmount / _maxDownSample );
+    float ratio = 1.f + ( _actualDownSampleAmount / _maxDownSample );
     for ( int c = 0; c < _amountOfChannels; ++c ) {
         _lowPassFilters.at( c )->setRatio( ratio );
     }
@@ -211,19 +227,45 @@ void PluginProcess::cacheDownSamplingValues()
 
 void PluginProcess::cacheLfo()
 {
-    _downSampleLfoRange = _downSampleAmount * _downSampleLfoDepth;
-    // note down sampling is not in 0 - 1 range but rather 0 - _maxDownSample which is the max tolerated value for LfoMax
-    _downSampleLfoMax   = std::min( _maxDownSample, _downSampleAmount + _downSampleLfoRange / 2.f );
-    _downSampleLfoMin   = std::max( 0.f, _downSampleAmount - _downSampleLfoRange / 2.f );
+    _downSampleLfoRange = ( _downSampleAmount / _maxDownSample ) * _downSampleLfoDepth;
+    _downSampleLfoMax   = std::min( 1.f, _downSampleAmount + _downSampleLfoRange * .5f );
+    _downSampleLfoMin   = std::max( 0.f, _downSampleAmount - _downSampleLfoRange * .5f );
 
     _playbackRateLfoRange = _playbackRate * _playbackRateLfoDepth;
-    _playbackRateLfoMax   = std::min( 1.f, _playbackRate + _playbackRateLfoRange / 2.f );
-    _playbackRateLfoMin   = std::max( 0.f, _playbackRate - _playbackRateLfoRange / 2.f );
+    _playbackRateLfoMax   = std::min( 1.f, _playbackRate + _playbackRateLfoRange * .5f );
+    _playbackRateLfoMin   = std::max( 0.f, _playbackRate - _playbackRateLfoRange * .5f );
 }
 
 void PluginProcess::cacheMaxDownSample()
 {
     _maxDownSample = VST::SAMPLE_RATE / MIN_SAMPLE_RATE;
+}
+
+void PluginProcess::setActualDownSampling( float value )
+{
+    bool wasDownSampled     = isDownSampled();
+    _actualDownSampleAmount = value;
+    cacheDownSamplingValues();
+
+    // if down sampling is deactivated and there is no oscillation for the down sample rate
+    // and no playback slowdown taking place: sync the read pointer with the write pointer
+
+    if ( wasDownSampled && !isDownSampled() && !_hasDownSampleLfo && !isSlowedDown() && !_hasPlaybackRateLfo ) {
+        _readPointer = ( float ) _writePointer;
+    }
+}
+
+void PluginProcess::setActualPlaybackRate( float value )
+{
+    bool wasSlowedDown  = isSlowedDown();
+    _actualPlaybackRate = value;
+
+    // if slowdown is deactivated and there is no oscillation for the playback rate
+    // and no down sampling taking place: sync the read pointer with the write pointer
+
+    if ( wasSlowedDown && !isSlowedDown() && !_hasPlaybackRateLfo && !isDownSampled() ) {
+        _readPointer = ( float ) _writePointer;
+    }
 }
 
 }
