@@ -227,9 +227,11 @@ void PluginProcess::cacheDownSamplingValues()
 
 void PluginProcess::cacheLfo()
 {
-    _downSampleLfoRange = ( _downSampleAmount / _maxDownSample ) * _downSampleLfoDepth;
-    _downSampleLfoMax   = std::min( 1.f, _downSampleAmount + _downSampleLfoRange * .5f );
-    _downSampleLfoMin   = std::max( 0.f, _downSampleAmount - _downSampleLfoRange * .5f );
+    float scaledAmount = _downSampleAmount / _maxDownSample; // 0 - 1 range
+
+    _downSampleLfoRange = scaledAmount * _downSampleLfoDepth;
+    _downSampleLfoMax   = std::min( 1.f, scaledAmount + _downSampleLfoRange * .5f );
+    _downSampleLfoMin   = std::max( 0.f, scaledAmount - _downSampleLfoRange * .5f );
 
     _playbackRateLfoRange = _playbackRate * _playbackRateLfoDepth;
     _playbackRateLfoMax   = std::min( 1.f, _playbackRate + _playbackRateLfoRange * .5f );
