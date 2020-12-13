@@ -13,7 +13,7 @@ set(target homecorrupter)
 set(copyright "igorski.nl 2020")
 set(major_version 1)
 set(minor_version 0)
-set(release_number 2)
+set(release_number 3)
 set(build_number 1) # TODO supply through CLI (build number is not included in public facing version strings)
 
 #####################
