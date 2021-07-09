@@ -37,7 +37,7 @@ class PluginProcess
 {
     // dithering constants
 
-    const float DITHER_WORD_LENGTH = pow( 2.0, 15 );        // 15 implies 16-bit depth
+    const float DITHER_WORD_LENGTH = pow( 2.f, 15f );       // 15 implies 16-bit depth
     const float DITHER_WI          = 1.0f / DITHER_WORD_LENGTH;
     const float DITHER_DC_OFFSET   = DITHER_WI * 0.5f;      // apply in resampling routine to remove DC offset
     const float DITHER_AMPLITUDE   = DITHER_WI / RAND_MAX;  // 2 LSB

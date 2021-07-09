@@ -112,7 +112,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             // we apply a lowpass filter to prevent interpolation artefacts
 
             curSample = lowPassFilter->applySingle( s1 + ( s2 - s1 ) * frac );
-            outSample = curSample * .5;
+            outSample = curSample * .5f;
 
             int start = i;
             for ( l = std::min( bufferSize, start + _sampleIncr ); i < l; ++i ) {
@@ -120,7 +120,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                 r1 = rand();
 
                 nextSample = outSample + lastSample;
-                lastSample = nextSample * .25;
+                lastSample = nextSample * .25f;
 
                 // write sample into the output buffer, corrected for DC offset and dithering applied
 

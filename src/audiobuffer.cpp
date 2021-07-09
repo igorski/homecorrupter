@@ -38,7 +38,7 @@ AudioBuffer::AudioBuffer( int aAmountOfChannels, int aBufferSize )
 
     for ( int i = 0; i < amountOfChannels; ++i ) {
         _buffers->at( i ) = new float[ aBufferSize ];
-        memset( _buffers->at( i ), 0, aBufferSize * sizeof( float )); // zero bits should equal 0.f
+        memset( _buffers->at( i ), 0.f, aBufferSize * sizeof( float )); // zero bits should equal 0.f
     }
 }
 

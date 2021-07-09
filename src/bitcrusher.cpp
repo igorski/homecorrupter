@@ -142,7 +142,7 @@ void BitCrusher::cacheLFO()
 void BitCrusher::calcBits()
 {
     // scale float to 1 - 16 bit range
-    _bits = ( int ) floor( Calc::scale( _tempAmount, 1, 15 )) + 1;
+    _bits = ( int ) floor( Calc::scale( _tempAmount, 1.f, 15.f )) + 1;
 }
 
 }
