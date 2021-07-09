@@ -45,7 +45,7 @@ void Limiter::process( SampleType** outputBuffer, int bufferSize, int numOutChan
     SampleType* leftBuffer  = outputBuffer[ 0 ];
     SampleType* rightBuffer = hasRight ? outputBuffer[ 1 ] : 0;
 
-    if ( pKnee > 0.5 )
+    if ( pKnee > 0.5f )
     {
         // soft knee
 
@@ -76,7 +76,7 @@ void Limiter::process( SampleType** outputBuffer, int bufferSize, int numOutChan
             ol  = leftBuffer[ i ];
             or_ = hasRight ? rightBuffer[ i ] : 0;
 
-            lev = ( SampleType ) ( 0.5 * g * fabs( ol + or_ ));
+            lev = ( SampleType ) ( 0.5f * g * fabs( ol + or_ ));
 
             if ( lev > th ) {
                 g = g - ( at * ( lev - th ));
