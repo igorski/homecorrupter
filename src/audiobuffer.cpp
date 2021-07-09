@@ -108,7 +108,7 @@ void AudioBuffer::silenceBuffers()
 {
     // use mem set to quickly erase existing buffer contents, zero bits should equal 0.f
     for ( int i = 0; i < amountOfChannels; ++i )
-        memset( getBufferForChannel( i ), 0, bufferSize * sizeof( float ));
+        memset( getBufferForChannel( i ), 0.f, bufferSize * sizeof( float ));
 }
 
 void AudioBuffer::adjustBufferVolumes( float amp )

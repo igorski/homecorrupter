@@ -94,7 +94,7 @@ void BitCrusher::process( float* inBuffer, int bufferSize )
 
         if ( hasLFO ) {
             // multiply by .5 and add .5 to make the LFO's bipolar waveform unipolar
-            float lfoValue = lfo->peek() * .5f  + .5f;
+            float lfoValue = lfo->peek() * .5f + .5f;
             _tempAmount = std::min( _lfoMax, _lfoMin + _lfoRange * lfoValue );
 
             // recalculate the current resolution

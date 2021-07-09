@@ -24,7 +24,7 @@ namespace VST {
 
     static const float PI       = 3.141592653589793f;
     static const float TWO_PI   = PI * 2.f;
-    static const float SQRT_TWO = sqrt( 2 );
+    static const float SQRT_TWO = sqrt( 2.f );
 
     // maximum and minimum rate of oscillation in Hz
     // also see plugin.uidesc to update the controls to match
