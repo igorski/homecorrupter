@@ -133,11 +133,10 @@ class PluginProcess
         }
 
         // ensures the pre- and post mix buffers match the appropriate amount of channels
-        // and buffer size. this also clones the contents of given in buffer into the pre-mix buffer
-        // the buffers are pooled so this can be called upon each process cycle without allocation overhead
+        // and buffer size. the buffers are pooled so this can be called upon each process
+        // cycle without allocation overhead
 
-        template <typename SampleType>
-        void prepareMixBuffers( SampleType** inBuffer, int numInChannels, int bufferSize );
+        void prepareMixBuffers( int numInChannels, int bufferSize );
 };
 }
 

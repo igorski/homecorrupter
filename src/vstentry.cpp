@@ -25,7 +25,7 @@
 #include "global.h"
 #include "version.h"
 
-#include "public.sdk/source/main/pluginfactory.h"
+#include "public.sdk/source/main/pluginfactoryvst3.h"
 
 #if TARGET_OS_IPHONE
 #include "public.sdk/source/vst/vstguieditor.h"

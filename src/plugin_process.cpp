@@ -270,4 +270,27 @@ void PluginProcess::setActualPlaybackRate( float value )
     }
 }
 
+void PluginProcess::prepareMixBuffers( int numInChannels, int bufferSize )
+{
+    // if the record buffer wasn't created yet or the buffer size has changed
+    // delete existing buffer and create new one to match properties
+
+    int idealRecordSize = Calc::secondsToBuffer( MAX_RECORD_SECONDS );
+    int recordSize      = idealRecordSize + idealRecordSize % bufferSize;
+
+    if ( _recordBuffer == nullptr || _recordBuffer->bufferSize != recordSize ) {
+        delete _recordBuffer;
+        _recordBuffer = new AudioBuffer( numInChannels, recordSize );
+        _maxRecordBufferSize = recordSize;
+    }
+
+    // if the pre mix buffer wasn't created yet or the buffer size has changed
+    // delete existing buffer and create new one to match properties
+
+    if ( _preMixBuffer == nullptr || _preMixBuffer->bufferSize != bufferSize ) {
+        delete _preMixBuffer;
+        _preMixBuffer = new AudioBuffer( numInChannels, bufferSize );
+    }
+}
+
 }

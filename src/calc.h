@@ -27,6 +27,9 @@
 #include <algorithm>
 #include "global.h"
 
+#define undenormaliseFloat(sample) ((((*(uint32 *)&(sample))&0x7f800000)==0)&&((sample)!=0.f))
+#define undenormaliseDouble(sample) ((((((uint32 *)&(sample))[1])&0x7fe00000)==0)&&((sample)!=0.))
+
 /**
  * convenience utilities to process values
  * common to the VST plugin context

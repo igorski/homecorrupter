@@ -29,6 +29,10 @@ template <typename SampleType>
 void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int numInChannels, int numOutChannels,
                              int bufferSize, uint32 sampleFramesSize ) {
 
+    if ( bufferSize == 0 ) {
+        return; // validator Variable Block Size test
+    }
+
     // input and output buffers can be float or double as defined
     // by the templates SampleType value. Internally we process
     // audio as floats
@@ -41,19 +45,20 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
     SampleType dryMix = ( SampleType ) _dryMix;
     SampleType wetMix = ( SampleType ) _wetMix;
 
-    prepareMixBuffers( inBuffer, numInChannels, bufferSize );
+    prepareMixBuffers( numInChannels, bufferSize );
 
     float readPointer;
     int writePointer;
     int recordMax = _maxRecordBufferSize - 1; // never record beyond the record buffer size (duh...)
 
     int t, t2;
-    float incr, frac, s1, s2;
+    float incr;
+    float frac, s1, s2;
 
     int maxBufferPos  = bufferSize - 1;
     int maxReadOffset = _writePointer + maxBufferPos; // never read beyond the range of the current incoming input
 
-    float curSample, nextSample, outSample;
+    float curSample, nextSample, lastSample, outSample;
 
     // cache oscillator positions (are reset for each channel where the last iteration is saved)
 
@@ -81,7 +86,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
         _downSampleLfo->setAccumulator( downSampleLfoAcc );
         _playbackRateLfo->setAccumulator( playbackRateLfoAcc );
 
-        float lastSample = _lastSamples[ c ];
+        lastSample = _lastSamples[ c ];
 
         // write input into the record buffer (converting to float when necessary)
 
@@ -101,10 +106,10 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             t2 = std::min( recordMax, t + _sampleIncr );
 
             // this fractional is in the 0 - 1 range
-            // NOTE: we have uncommented this calculation
+            // NOTE: we have commented this calculation
             // as the result is devilishly tasty when down sampling
 
-            frac = /*readPointer - t :*/ 0;
+            frac = /*readPointer - t :*/ 0.f;
 
             s1 = channelRecordBuffer[ t ];
             s2 = channelRecordBuffer[ t2 ];
@@ -112,7 +117,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             // we apply a lowpass filter to prevent interpolation artefacts
 
             curSample = lowPassFilter->applySingle( s1 + ( s2 - s1 ) * frac );
-            outSample = curSample * .5;
+            outSample = curSample * .5f;
 
             int start = i;
             for ( l = std::min( bufferSize, start + _sampleIncr ); i < l; ++i ) {
@@ -120,11 +125,11 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                 r1 = rand();
 
                 nextSample = outSample + lastSample;
-                lastSample = nextSample * .25;
+                lastSample = nextSample * .25f;
 
                 // write sample into the output buffer, corrected for DC offset and dithering applied
 
-                channelPreMixBuffer[ i ] = nextSample + DITHER_DC_OFFSET + DITHER_AMPLITUDE * ( float )( r1 - r2 );
+                channelPreMixBuffer[ i ] = nextSample + DITHER_DC_OFFSET + DITHER_AMPLITUDE * ( r1 - r2 );
 
                 // run the oscillators, note we multiply by .5 and add .5 to make the LFO's bipolar waveforms unipolar
 
@@ -163,7 +168,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
             // wet mix (e.g. the effected signal)
 
-            channelOutBuffer[ i ] = ( SampleType ) channelPreMixBuffer[ i ] * wetMix;
+            channelOutBuffer[ i ] = (( SampleType ) channelPreMixBuffer[ i ] ) * wetMix;
 
             // dry mix (e.g. mix in the input signal)
 
@@ -180,30 +185,6 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
     // limit the output signal in case its gets hot (e.g. on heavy bit reduction)
     limiter->process<SampleType>( outBuffer, bufferSize, numOutChannels );
-}
-
-template <typename SampleType>
-void PluginProcess::prepareMixBuffers( SampleType** inBuffer, int numInChannels, int bufferSize )
-{
-    // if the record buffer wasn't created yet or the buffer size has changed
-    // delete existing buffer and create new one to match properties
-
-    int idealRecordSize = Calc::secondsToBuffer( MAX_RECORD_SECONDS );
-    int recordSize      = idealRecordSize + idealRecordSize % bufferSize;
-
-    if ( _recordBuffer == nullptr || _recordBuffer->bufferSize != recordSize ) {
-        delete _recordBuffer;
-        _recordBuffer = new AudioBuffer( numInChannels, recordSize );
-        _maxRecordBufferSize = recordSize;
-    }
-
-    // if the pre mix buffer wasn't created yet or the buffer size has changed
-    // delete existing buffer and create new one to match properties
-
-    if ( _preMixBuffer == nullptr || _preMixBuffer->bufferSize != bufferSize ) {
-        delete _preMixBuffer;
-        _preMixBuffer = new AudioBuffer( numInChannels, bufferSize );
-    }
 }
 
 }

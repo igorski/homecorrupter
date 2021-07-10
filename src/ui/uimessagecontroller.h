@@ -34,7 +34,7 @@ namespace Vst {
 // PluginUIMessageController
 //------------------------------------------------------------------------
 template <typename ControllerType>
-class PluginUIMessageController : public VSTGUI::IController, public VSTGUI::ViewListenerAdapter
+class PluginUIMessageController : public VSTGUI::IController, public VSTGUI::IViewListenerAdapter
 {
     public:
         enum Tags
