@@ -32,65 +32,59 @@ void Limiter::process( SampleType** outputBuffer, int bufferSize, int numOutChan
 //        return;
 //    }
 
-    SampleType g, at, re, tr, th, lev, ol, or_;
+    SampleType gain, level, leftSample, rightSample;
 
-    th = thresh;
-    g = gain;
-    at = att;
-    re = rel;
-    tr = trim;
+    gain = _gain;
 
     bool hasRight = ( numOutChannels > 1 );
 
     SampleType* leftBuffer  = outputBuffer[ 0 ];
     SampleType* rightBuffer = hasRight ? outputBuffer[ 1 ] : 0;
 
-    if ( pKnee > 0.5 )
+    if ( _softKnee )
     {
-        // soft knee
-
         for ( int i = 0; i < bufferSize; ++i ) {
 
-            ol  = leftBuffer[ i ];
-            or_ = hasRight ? rightBuffer[ i ] : 0;
+            leftSample  = leftBuffer[ i ];
+            rightSample = hasRight ? rightBuffer[ i ] : 0;
 
-            lev = ( SampleType ) ( 1.f / ( 1.f + th * fabs( ol + or_ )));
+            level = SampleType ( 1.0 / ( 1.0 + pThreshold * fabs( leftSample + rightSample )));
 
-            if ( g > lev ) {
-                g = g - at * ( g - lev );
+            if ( gain > level ) {
+                gain = gain - _attack * ( gain - level );
             }
             else {
-                g = g + re * ( lev - g );
+                gain = gain + _release * ( level - gain );
             }
 
-            leftBuffer[ i ] = ( ol * tr * g );
+            leftBuffer[ i ] = ( leftSample * _trim * gain );
 
             if ( hasRight )
-                rightBuffer[ i ] = ( or_ * tr * g );
+                rightBuffer[ i ] = ( rightSample * _trim * gain );
         }
     }
     else
     {
         for ( int i = 0; i < bufferSize; ++i ) {
 
-            ol  = leftBuffer[ i ];
-            or_ = hasRight ? rightBuffer[ i ] : 0;
+            leftSample  = leftBuffer[ i ];
+            rightSample = hasRight ? rightBuffer[ i ] : 0;
 
-            lev = ( SampleType ) ( 0.5 * g * fabs( ol + or_ ));
+            level = SampleType ( 0.5 * gain * fabs( leftSample + rightSample ));
 
-            if ( lev > th ) {
-                g = g - ( at * ( lev - th ));
+            if ( level > pThreshold ) {
+                gain = gain - ( _attack * ( level - pThreshold ));
             }
             else {
                 // below threshold
-                g = g + ( SampleType )( re * ( 1.f - g ));
+                gain = gain + SampleType ( _release * ( 1.0 - gain ));
             }
 
-            leftBuffer[ i ] = ( ol * tr * g );
+            leftBuffer[ i ] = ( leftSample * _trim * gain );
 
             if ( hasRight )
-                rightBuffer[ i ] = ( or_ * tr * g );
+                rightBuffer[ i ] = ( rightSample * _trim * gain );
         }
     }
-    gain = g;
+    _gain = gain;
 }

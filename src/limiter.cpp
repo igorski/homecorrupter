@@ -25,18 +25,26 @@
  */
 #include "limiter.h"
 #include "global.h"
+#include "calc.h"
 #include <math.h>
 
 // constructors / destructor
 
 Limiter::Limiter()
 {
-    init( 0.15, 0.50, 0.60 );
+    init( 0.8f, 1.0f, 0.55f, true );
 }
 
-Limiter::Limiter( float attackMs, float releaseMs, float thresholdDb )
+Limiter::Limiter( float attackNormalized, float releaseNormalized, float thresholdNormalized )
 {
-    init( attackMs, releaseMs, thresholdDb );
+    init( attackNormalized, releaseNormalized, thresholdNormalized, false );
+}
+
+Limiter::Limiter( float attackInMicroseconds, float releaseInMilliseconds, float thresholdNormalized, bool softKnee )
+{
+    init( 0.f, 0.f, thresholdNormalized, softKnee );
+    setAttackMicroseconds( attackInMicroseconds );
+    setReleaseMilliseconds( releaseInMilliseconds );
 }
 
 Limiter::~Limiter()
@@ -46,55 +54,69 @@ Limiter::~Limiter()
 
 /* public methods */
 
-void Limiter::setAttack( float attackMs )
+void Limiter::setAttack( float attackNormalized )
 {
-    pAttack = ( float ) attackMs;
-    recalculate();
+    _attack = pow( 10.0, -2.0 * attackNormalized );
 }
 
-void Limiter::setRelease( float releaseMs )
+void Limiter::setAttackMicroseconds( float attackInMicroseconds )
 {
-    pRelease = ( float ) releaseMs;
-    recalculate();
+    _attack = 1.0 - Igorski::Calc::inverseLog( 1.f / ( attackInMicroseconds / -301030.1f ) / ( float ) Igorski::VST::SAMPLE_RATE, 10 );
 }
 
-void Limiter::setThreshold( float thresholdDb )
+void Limiter::setRelease( float releaseNormalized )
 {
-    pTresh = ( float ) thresholdDb;
-    recalculate();
+    _release = pow( 10.0, -2.0 - ( 3.0 * releaseNormalized ));
+}
+
+void Limiter::setReleaseMilliseconds( float releaseInMilliseconds )
+{
+    _release = 1.0 - Igorski::Calc::inverseLog( 1.f / ( releaseInMilliseconds / -301.0301f ) / ( float ) Igorski::VST::SAMPLE_RATE, 10 );
+}
+
+void Limiter::setThreshold( float thresholdNormalized )
+{
+    _threshold = thresholdNormalized;
+    cacheValues();
+}
+
+bool Limiter::getSoftKnee()
+{
+    return _softKnee;
+}
+
+void Limiter::setSoftKnee( bool softKnee )
+{
+    _softKnee = softKnee;
+    cacheValues();
 }
 
 float Limiter::getLinearGR()
 {
-    return gain > 1.f ? 1.f / gain : 1.f;
+    return ( _gain > 1.0f ) ? 1.0f / ( float ) _gain : 1.0f;
 }
 
 /* protected methods */
 
-void Limiter::init( float attackMs, float releaseMs, float thresholdDb )
+void Limiter::init( float attackNormalized, float releaseNormalized, float thresholdNormalized, bool softKnee )
 {
-    pAttack  = ( float ) attackMs;
-    pRelease = ( float ) releaseMs;
-    pTresh   = ( float ) thresholdDb;
-    pTrim    = ( float ) 0.60;
-    pKnee    = ( float ) 0.40;
+    _threshold = thresholdNormalized;
 
-    gain = 1.f;
+    float trim = 0.60f;
 
-    recalculate();
+    _gain = 1.0f;
+    _trim = pow( 10.0, ( 2.0 * trim ) - 1.0 );
+
+    setAttack( attackNormalized );
+    setRelease( releaseNormalized );
+    setSoftKnee( softKnee );
 }
 
-void Limiter::recalculate()
+void Limiter::cacheValues()
 {
-    if ( pKnee > 0.5 ) {
-        // soft knee
-        thresh = ( float ) pow( 10.0, 1.f - ( 2.0 * pTresh ));
+    if ( _softKnee ) {
+        pThreshold = pow( 10.0, 1.0 - ( 2.0 * _threshold ));
+    } else {
+        pThreshold = pow( 10.0, ( 2.0 * _threshold ) - 2.0 );
     }
-    else {
-        // hard knee
-        thresh = ( float ) pow( 10.0, ( 2.0 * pTresh ) - 2.0 );
-    }
-    trim = ( float )( pow( 10.0, ( 2.0 * pTrim) - 1.f ));
-    att  = ( float )  pow( 10.0, -2.0 * pAttack );
-    rel  = ( float )  pow( 10.0, -2.0 - ( 3.0 * pRelease ));
 }

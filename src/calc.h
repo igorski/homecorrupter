@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2022 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -26,6 +26,14 @@
 #include <cmath>
 #include <algorithm>
 #include "global.h"
+
+/***
+ * Taken from JUCE library
+ * This macro can be applied to a float variable to check whether it contains a denormalised value, and to normalise it if necessary.
+ * On CPUs that aren't vulnerable to denormalisation problems, this will have no effect.
+ * This activates the Flush To Zero(FTZ) and Denormals Are Zero (DAZ) mode for x86 and x64
+ */
+#define UNDENORMALISE(x) { (x) += 0.1f; (x) -= 0.1f; }
 
 /**
  * convenience utilities to process values
@@ -94,6 +102,21 @@ namespace Calc {
     inline bool toBool( float value )
     {
         return value >= .5;
+    }
+
+    // inverts a pow operation, allowing you to derive the exponent from the known value and base
+
+    inline float inversePow( float value, float base )
+    {
+        return log( value ) / log( base );
+    }
+
+    // inverts a log operation, allowing you to derive the original number from the known value and base
+    // e.g. reverting log10( 0.5 ) is inverseLog( -0.3010299956639812, 10 ) == 0.5
+
+    inline float inverseLog( float value, float base )
+    {
+        return pow( base, value );
     }
 }
 }

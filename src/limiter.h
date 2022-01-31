@@ -33,29 +33,49 @@ class Limiter
 {
     public:
         Limiter();
-        Limiter( float attackMs, float releaseMs, float thresholdDb );
+        /**
+         * Unit specific constructor
+         * @param attackInMicroseconds up to 1563.90 microseconds
+         * @param releaseInMilliseconds up to 1571/755 milliseconds
+         * @param thresholdNormalized 0 - 1 range where 0 == -20 dB and 1 == +20 dB
+         * @param softKnee
+         */
+        Limiter( float attackInMicroseconds, float releaseInMilliseconds, float thresholdNormalized, bool softKnee );
+        /**
+         * legacy constructor using normalized (0 - 1 range) values (TO BE DEPRECATED?)
+         * @param attackNormalized (1 == 1563.89 microseconds)
+         * @param releaseNormalized (1 == 1571.755 milliseconds)
+         * @param thresholdNormalized (0 == -20 dB and 1 == +20 dB)
+         */
+        Limiter( float attackNormalized, float releaseNormalized, float thresholdNormalized );
         ~Limiter();
 
         template <typename SampleType>
         void process( SampleType** outputBuffer, int bufferSize, int numOutChannels );
 
-        void setAttack( float attackMs );
-        void setRelease( float releaseMs );
-        void setThreshold( float thresholdDb );
+        void setAttack( float attackNormalized );
+        void setAttackMicroseconds( float attackInMicroseconds );
+        void setRelease( float releaseNormalized );
+        void setReleaseMilliseconds( float releaseInMilliseconds );
+        void setThreshold( float thresholdNormalized );
+        bool getSoftKnee();
+        void setSoftKnee( bool softKnee );
 
         float getLinearGR();
 
     protected:
-        void init( float attackMs, float releaseMs, float thresholdDb );
-        void recalculate();
+        void init( float attackNormalized, float releaseNormalized, float thresholdNormalized, bool softKnee );
+        void cacheValues();
 
-        float pTresh;   // in dB, -20 - 20
-        float pTrim;
-        float pAttack;  // in microseconds
-        float pRelease; // in ms
-        float pKnee;
+        // instance variables
 
-        float thresh, gain, att, rel, trim;
+        float _threshold;
+        float _trim;
+        float _attack;
+        float _release;
+        float _gain;
+        bool  _softKnee;
+        float pThreshold; // cached process value of threshold for given knee type
 };
 
 #include "limiter.tcc"

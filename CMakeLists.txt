@@ -10,10 +10,10 @@ set(CMAKE_COLOR_MAKEFILE ON)
 
 project(homecorrupter)
 set(target homecorrupter)
-set(copyright "igorski.nl 2020")
+set(copyright "igorski.nl 2020-2022")
 set(major_version 1)
-set(minor_version 0)
-set(release_number 3)
+set(minor_version 1)
+set(release_number 1)
 set(build_number 1) # TODO supply through CLI (build number is not included in public facing version strings)
 
 #####################
@@ -298,7 +298,7 @@ if (LINUX)
         fontconfig
         dl
     )
-    target_link_libraries(${target} PRIVATE ${LINUX_LIBRARIES}) 
+    target_link_libraries(${target} PRIVATE ${LINUX_LIBRARIES})
 endif()
 
 ## Include Windows specific libraries

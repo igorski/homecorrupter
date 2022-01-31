@@ -45,7 +45,7 @@ PluginProcess::PluginProcess( int amountOfChannels )
     // create the child processors
 
     bitCrusher = new BitCrusher( 1.f, .5f, 1.f );
-    limiter    = new Limiter( 10.f, 500.f, .6f );
+    limiter    = new Limiter( 0.3f, 0.5f, 0.9f, true );
 
     // buffers will be lazily created in the process function as they correspond to the host buffer size
     _recordBuffer  = nullptr;
