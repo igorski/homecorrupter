@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2022 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,6 +27,10 @@ namespace Igorski
 template <typename SampleType>
 void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int numInChannels, int numOutChannels,
                              int bufferSize, uint32 sampleFramesSize ) {
+
+    if ( bufferSize <= 0 ) {
+        return; // Variable Block Size unit test
+    }
 
     // input and output buffers can be float or double as defined
     // by the templates SampleType value. Internally we process
@@ -186,6 +190,14 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 template <typename SampleType>
 void PluginProcess::prepareMixBuffers( SampleType** inBuffer, int numInChannels, int bufferSize )
 {
+    // variable block size for a smaller block should not require new record buffers
+    // only create these when the last size was smaller than the current
+    if ( bufferSize <= _lastBufferSize ) {
+        return;
+    }
+
+    _lastBufferSize = bufferSize;
+    
     // if the record buffer wasn't created yet or the buffer size has changed
     // delete existing buffer and create new one to match properties
 
