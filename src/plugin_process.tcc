@@ -168,7 +168,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
             // wet mix (e.g. the effected signal)
 
-            channelOutBuffer[ i ] = ( SampleType ) channelPreMixBuffer[ i ] * wetMix;
+            channelOutBuffer[ i ] = Calc::capSample(( SampleType ) channelPreMixBuffer[ i ] * wetMix );
 
             // dry mix (e.g. mix in the input signal)
 
