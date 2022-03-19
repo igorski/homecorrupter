@@ -158,6 +158,11 @@ tresult PLUGIN_API PluginController::initialize( FUnknown* context )
 
 // --- AUTO-GENERATED END
 
+    // Bypass
+    parameters.addParameter(
+        STR16( "Bypass" ), nullptr, 1, 0, ParameterInfo::kCanAutomate | ParameterInfo::kIsBypass, kBypassId
+    );
+
     // initialization
 
     String str( "Homecorrupter" );
@@ -226,6 +231,10 @@ tresult PLUGIN_API PluginController::setComponentState( IBStream* state )
 
 // --- AUTO-GENERATED SETSTATE END
 
+        int32 savedBypass = 0;
+        if ( state->read( &savedBypass, sizeof( int32 )) != kResultOk )
+            return kResultFalse;
+
 #if BYTEORDER == kBigEndian
 
 // --- AUTO-GENERATED SETSTATE SWAP START
@@ -243,6 +252,8 @@ tresult PLUGIN_API PluginController::setComponentState( IBStream* state )
 
 // --- AUTO-GENERATED SETSTATE SWAP END
 
+    SWAP_32( savedBypass );
+
 #endif
 // --- AUTO-GENERATED SETSTATE SETPARAM START
         setParamNormalized( kResampleRateId, savedResampleRate );
@@ -258,6 +269,8 @@ tresult PLUGIN_API PluginController::setComponentState( IBStream* state )
         setParamNormalized( kDryMixId, savedDryMix );
 
 // --- AUTO-GENERATED SETSTATE SETPARAM END
+
+    setParamNormalized( kBypassId, savedBypass ? 1 : 0 );
 
         state->seek( sizeof ( float ), IBStream::kIBSeekCur );
     }

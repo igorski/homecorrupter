@@ -72,6 +72,7 @@ class PluginProcess
     private:
         AudioBuffer* _recordBuffer; // buffer used to record incoming signal
         AudioBuffer* _preMixBuffer; // buffer used for the pre-effect mixing
+        int _lastBufferSize = 0;    // size of the last buffer used when generating the _recordBuffer
 
         float _dryMix;
         float _wetMix;

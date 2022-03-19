@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2022 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -184,6 +184,11 @@ tresult PLUGIN_API Homecorrupter::process( ProcessData& data )
                         break;
 
 // --- AUTO-GENERATED PROCESS END
+                    case kBypassId:
+                        if ( paramQueue->getPoint( numPoints - 1, sampleOffset, value) == kResultTrue ) {
+                            _bypass = value >= 0.5f;
+                        }
+                        break;
                 }
                 syncModel();
             }
@@ -241,23 +246,36 @@ tresult PLUGIN_API Homecorrupter::process( ProcessData& data )
     void** in  = getChannelBuffersPointer( processSetup, data.inputs [ 0 ] );
     void** out = getChannelBuffersPointer( processSetup, data.outputs[ 0 ] );
 
-    // process the incoming sound!
-
     bool isDoublePrecision = ( data.symbolicSampleSize == kSample64 );
 
-    if ( isDoublePrecision ) {
-        // 64-bit samples, e.g. Reaper64
-        pluginProcess->process<double>(
-            ( double** ) in, ( double** ) out, numInChannels, numOutChannels,
-            data.numSamples, sampleFramesSize
-        );
+    if ( _bypass )
+    {
+        // bypass mode, ensure output equals input
+
+        for ( int32 i = 0; i < numInChannels; i++ ) {
+            if ( in[ i ] != out[ i ]) {
+                memcpy( out[ i ], in[ i ], sampleFramesSize );
+            }
+        }
     }
-    else {
-        // 32-bit samples, e.g. Ableton Live, Bitwig Studio... (oddly enough also when 64-bit?)
-        pluginProcess->process<float>(
-            ( float** ) in, ( float** ) out, numInChannels, numOutChannels,
-            data.numSamples, sampleFramesSize
-        );
+    else
+    {
+        // process the incoming sound!
+
+        if ( isDoublePrecision ) {
+            // 64-bit samples, e.g. Reaper64
+            pluginProcess->process<double>(
+                ( double** ) in, ( double** ) out, numInChannels, numOutChannels,
+                data.numSamples, sampleFramesSize
+            );
+        }
+        else {
+            // 32-bit samples, e.g. Ableton Live, Bitwig Studio... (oddly enough also when 64-bit?)
+            pluginProcess->process<float>(
+                ( float** ) in, ( float** ) out, numInChannels, numOutChannels,
+                data.numSamples, sampleFramesSize
+            );
+        }
     }
 
     // output flags
@@ -343,6 +361,10 @@ tresult PLUGIN_API Homecorrupter::setState( IBStream* state )
 
 // --- AUTO-GENERATED SETSTATE END
 
+    int32 savedBypass = 0;
+    if ( state->read( &savedBypass, sizeof ( int32 )) != kResultOk )
+        return kResultFalse;
+
 #if BYTEORDER == kBigEndian
 
 // --- AUTO-GENERATED SETSTATE SWAP START
@@ -376,6 +398,8 @@ tresult PLUGIN_API Homecorrupter::setState( IBStream* state )
     fDryMix = savedDryMix;
 
 // --- AUTO-GENERATED SETSTATE APPLY END
+
+    _bypass = savedBypass > 0;
 
     syncModel();
 
@@ -432,6 +456,7 @@ tresult PLUGIN_API Homecorrupter::getState( IBStream* state )
 
 // --- AUTO-GENERATED GETSTATE END
 
+    int32 toSaveBypass = _bypass ? 1 : 0;
 
 #if BYTEORDER == kBigEndian
 
@@ -450,6 +475,8 @@ tresult PLUGIN_API Homecorrupter::getState( IBStream* state )
 
 // --- AUTO-GENERATED GETSTATE SWAP END
 
+    SWAP_32( toSaveBypass );
+
 #endif
 
 // --- AUTO-GENERATED GETSTATE APPLY START
@@ -466,6 +493,8 @@ tresult PLUGIN_API Homecorrupter::getState( IBStream* state )
     state->write( &toSaveDryMix, sizeof( float ));
 
 // --- AUTO-GENERATED GETSTATE APPLY END
+
+    state->write( &toSaveBypass, sizeof( int32 ));
 
     return kResultOk;
 }

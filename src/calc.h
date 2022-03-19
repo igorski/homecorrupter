@@ -74,6 +74,11 @@ namespace Calc {
         return std::min( 1.f, std::max( -1.f, value ));
     }
 
+    inline double capSample( double value )
+    {
+        return std::min( 1.0, std::max( -1.0, value ));
+    }
+
     // convenience method to round given number value to the nearest
     // multiple of valueToRoundTo
     // e.g. roundTo( 236.32, 10 ) == 240 and roundTo( 236.32, 5 ) == 235
