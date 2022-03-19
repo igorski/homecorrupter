@@ -30,7 +30,7 @@ const MODEL = [
     {
         name: 'resampleRate',
         descr: 'Resample rate',
-        unitDescr: '%',
+        unitDescr: 'Hz',
         value: { min: '0.f', max: '1.f', def: '1.f', type: 'percent' },
         ui: { x: 292, y: 196, w: 134, h: 21 },
         customDescr: 'sprintf( text, "%.2d Hz", ( int ) (( Igorski::VST::SAMPLE_RATE - Igorski::PluginProcess::MIN_SAMPLE_RATE ) * valueNormalized ) + ( int ) Igorski::PluginProcess::MIN_SAMPLE_RATE );'

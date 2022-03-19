@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2022 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -80,7 +80,7 @@ tresult PLUGIN_API PluginController::initialize( FUnknown* context )
 // --- AUTO-GENERATED START
 
     RangeParameter* resampleRateParam = new RangeParameter(
-        USTRING( "Resample rate" ), kResampleRateId, USTRING( "%" ),
+        USTRING( "Resample rate" ), kResampleRateId, USTRING( "Hz" ),
         0.f, 1.f, 1.f,
         0, ParameterInfo::kCanAutomate, unitId
     );
