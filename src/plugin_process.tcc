@@ -149,7 +149,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             incr = _fSampleIncr * _actualPlaybackRate;
 
             if (( readPointer += incr ) > maxReadOffset ) {
-                readPointer = ( float ) _writePointer; // don't go to 0.f but align with current write offset to play "current audio"
+                readPointer = ( float ) writePointer; // don't go to 0.f but align with last write offset to play "current audio"
             }
         }
 
@@ -197,7 +197,7 @@ void PluginProcess::prepareMixBuffers( SampleType** inBuffer, int numInChannels,
     }
 
     _lastBufferSize = bufferSize;
-    
+
     // if the record buffer wasn't created yet or the buffer size has changed
     // delete existing buffer and create new one to match properties
 
