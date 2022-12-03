@@ -36,7 +36,7 @@ using namespace VSTGUI;
 template<typename T>
 class PluginUIMessageController;
 
-class PluginController : public EditControllerEx1, public IMidiMapping, public VST3EditorDelegate
+class PluginController : public EditControllerEx1, public IMidiMapping, public VSTGUI::VST3EditorDelegate
 {
     public:
         typedef PluginUIMessageController<PluginController> UIMessageController;
