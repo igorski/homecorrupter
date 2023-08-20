@@ -247,6 +247,10 @@ tresult PLUGIN_API Homecorrupter::process( ProcessData& data )
     void** out = getChannelBuffersPointer( processSetup, data.outputs[ 0 ] );
 
     bool isDoublePrecision = ( data.symbolicSampleSize == kSample64 );
+    bool isSilent = data.inputs[ 0 ].silenceFlags != 0;
+    // note slowed playback is always processed, even when input is silent (as record buffer might have content)
+    // we also keep the oscillators moving regardless of receiving input or not
+    bool doProcessing = !isSilent || ( pluginProcess->isSlowedDown() || pluginProcess->isOscillating() );
 
     if ( _bypass )
     {
@@ -258,7 +262,7 @@ tresult PLUGIN_API Homecorrupter::process( ProcessData& data )
             }
         }
     }
-    else
+    else if ( doProcessing )
     {
         // process the incoming sound!
 
@@ -280,20 +284,22 @@ tresult PLUGIN_API Homecorrupter::process( ProcessData& data )
 
     // output flags
 
-    data.outputs[ 0 ].silenceFlags = false; // there should always be output
-    float outputGain = pluginProcess->limiter->getLinearGR();
+    if ( isSilent && !doProcessing ) {
+        data.outputs[ 0 ].silenceFlags = (( uint64 ) 1 << numOutChannels ) - 1;
+    }
+    // float outputGain = pluginProcess->limiter->getLinearGR();
 
     //---4) Write output parameter changes-----------
-    IParameterChanges* outParamChanges = data.outputParameterChanges;
-    // a new value of VuMeter will be sent to the host
-    // (the host will send it back in sync to our controller for updating our editor)
-    if ( !isDoublePrecision && outParamChanges && outputGainOld != outputGain ) {
-        int32 index = 0;
-        IParamValueQueue* paramQueue = outParamChanges->addParameterData( kVuPPMId, index );
-        if ( paramQueue )
-            paramQueue->addPoint( 0, outputGain, index );
-    }
-    outputGainOld = outputGain;
+    // IParameterChanges* outParamChanges = data.outputParameterChanges;
+    // // a new value of VuMeter will be sent to the host
+    // // (the host will send it back in sync to our controller for updating our editor)
+    // if ( !isDoublePrecision && outParamChanges && outputGainOld != outputGain ) {
+    //     int32 index = 0;
+    //     IParamValueQueue* paramQueue = outParamChanges->addParameterData( kVuPPMId, index );
+    //     if ( paramQueue )
+    //         paramQueue->addPoint( 0, outputGain, index );
+    // }
+    // outputGainOld = outputGain;
     return kResultOk;
 }
 
@@ -508,16 +514,6 @@ tresult PLUGIN_API Homecorrupter::setupProcessing( ProcessSetup& newSetup )
     currentProcessMode = newSetup.processMode;
 
     VST::SAMPLE_RATE = newSetup.sampleRate;
-
-    // spotted to fire multiple times...
-
-    if ( pluginProcess != nullptr ) {
-        delete pluginProcess;
-    }
-
-    // TODO: creating a bunch of extra channels for no apparent reason?
-    // get the correct channel amount and don't allocate more than necessary...
-    pluginProcess = new PluginProcess( 6 );
 
     syncModel();
 
