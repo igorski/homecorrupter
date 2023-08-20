@@ -69,6 +69,18 @@ class PluginProcess
         BitCrusher* bitCrusher;
         Limiter*    limiter;
 
+        inline bool isSlowedDown() {
+            return _actualPlaybackRate < 1.f;
+        }
+
+        inline bool isDownSampled() {
+            return _actualDownSampleAmount > 1.f;
+        }
+
+        inline bool isOscillating() {
+            return _hasDownSampleLfo || _hasPlaybackRateLfo || bitCrusher->hasLFO;
+        }
+
     private:
         AudioBuffer* _recordBuffer; // buffer used to record incoming signal
         AudioBuffer* _preMixBuffer; // buffer used for the pre-effect mixing
@@ -124,14 +136,6 @@ class PluginProcess
 
         void setActualDownSampling( float value );
         void setActualPlaybackRate( float value );
-
-        inline bool isSlowedDown() {
-            return _actualPlaybackRate < 1.f;
-        }
-
-        inline bool isDownSampled() {
-            return _actualDownSampleAmount > 1.f;
-        }
 
         // ensures the pre- and post mix buffers match the appropriate amount of channels
         // and buffer size. this also clones the contents of given in buffer into the pre-mix buffer
