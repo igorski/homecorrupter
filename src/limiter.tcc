@@ -26,7 +26,7 @@
 template <typename SampleType>
 void Limiter::process( SampleType** outputBuffer, int bufferSize, int numOutChannels )
 {
-//    if ( gain > 0.9999f && outputBuffer->isSilent )
+//    if ( gain > 0.9999f && outputBuffer->isSilent() )
 //    {
 //        // don't process if input is silent
 //        return;

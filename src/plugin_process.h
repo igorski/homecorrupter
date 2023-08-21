@@ -57,6 +57,29 @@ class PluginProcess
             int bufferSize, uint32 sampleFramesSize
         );
 
+        // for a speed improvement we don't actually iterate over all channels, but assume
+        // that if the first channel is empty, all are.
+
+        inline bool isBufferSilent( float** buffer, int numChannels, int bufferSize ) {
+            float* channelBuffer = buffer[ 0 ];
+            for ( int32 i = 0; i < bufferSize; ++i ) {
+                if ( channelBuffer[ i ] != 0.f ) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        inline bool isBufferSilent( double** buffer, int numChannels, int bufferSize ) {
+            double* channelBuffer = buffer[ 0 ];
+            for ( int32 i = 0; i < bufferSize; ++i ) {
+                if ( channelBuffer[ i ] != 0.0 ) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
         void setResampleRate( float value );
         void setResampleLfo( float LFORatePercentage, float LFODepth );
         void setPlaybackRate( float value );

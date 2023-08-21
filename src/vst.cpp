@@ -246,11 +246,14 @@ tresult PLUGIN_API Homecorrupter::process( ProcessData& data )
     void** in  = getChannelBuffersPointer( processSetup, data.inputs [ 0 ] );
     void** out = getChannelBuffersPointer( processSetup, data.outputs[ 0 ] );
 
-    bool isDoublePrecision = ( data.symbolicSampleSize == kSample64 );
-    bool isSilent = data.inputs[ 0 ].silenceFlags != 0;
-    // note slowed playback is always processed, even when input is silent (as record buffer might have content)
-    // we also keep the oscillators moving regardless of receiving input or not
-    bool doProcessing = !isSilent || ( pluginProcess->isSlowedDown() || pluginProcess->isOscillating() );
+    bool isDoublePrecision = data.symbolicSampleSize == kSample64;
+    bool isSilentInput     = data.inputs[ 0 ].silenceFlags != 0;
+
+    // in HC, sound is always processed as we record input buffers for the down sampling and slowed down playback
+    // in case input is silent and pluginProcess->isSlowedDown() is active, we verify whether the output is silent
+    // (as the slowed down playback might be reading from a prefilled record buffer)
+
+    bool isSilentOutput = false;
 
     if ( _bypass )
     {
@@ -261,8 +264,9 @@ tresult PLUGIN_API Homecorrupter::process( ProcessData& data )
                 memcpy( out[ i ], in[ i ], sampleFramesSize );
             }
         }
+        isSilentOutput = isSilentInput;
     }
-    else if ( doProcessing )
+    else
     {
         // process the incoming sound!
 
@@ -272,6 +276,9 @@ tresult PLUGIN_API Homecorrupter::process( ProcessData& data )
                 ( double** ) in, ( double** ) out, numInChannels, numOutChannels,
                 data.numSamples, sampleFramesSize
             );
+            if ( isSilentInput && pluginProcess->isSlowedDown() ) {
+                isSilentOutput = pluginProcess->isBufferSilent(( double** ) out, numOutChannels, data.numSamples );
+            }
         }
         else {
             // 32-bit samples, e.g. Ableton Live, Bitwig Studio... (oddly enough also when 64-bit?)
@@ -279,14 +286,16 @@ tresult PLUGIN_API Homecorrupter::process( ProcessData& data )
                 ( float** ) in, ( float** ) out, numInChannels, numOutChannels,
                 data.numSamples, sampleFramesSize
             );
+            if ( isSilentInput && pluginProcess->isSlowedDown() ) {
+                isSilentOutput = pluginProcess->isBufferSilent(( float** ) out, numOutChannels, data.numSamples );
+            }
         }
     }
 
     // output flags
 
-    if ( isSilent && !doProcessing ) {
-        data.outputs[ 0 ].silenceFlags = (( uint64 ) 1 << numOutChannels ) - 1;
-    }
+    data.outputs[ 0 ].silenceFlags = isSilentOutput ? (( uint64 ) 1 << numOutChannels ) - 1 : 0;
+
     // float outputGain = pluginProcess->limiter->getLinearGR();
 
     //---4) Write output parameter changes-----------
