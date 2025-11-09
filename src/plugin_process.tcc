@@ -104,7 +104,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             t2 = std::min( recordMax, t + _sampleIncr );
 
             // this fractional is in the 0 - 1 range
-            // NOTE: we have uncommented this calculation
+            // NOTE: we have commented this calculation
             // as the result is devilishly tasty when down sampling
 
             frac = /*readPointer - t :*/ 0.f;
