@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2026 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -37,10 +37,28 @@ class PluginProcess
 {
     // dithering constants
 
-    const float DITHER_WORD_LENGTH = pow( 2.0, 15 );        // 15 implies 16-bit depth
+    const float DITHER_WORD_LENGTH = pow( 2.0, 15 ); // 15 implies 16-bit depth
     const float DITHER_WI          = 1.0f / DITHER_WORD_LENGTH;
-    const float DITHER_DC_OFFSET   = DITHER_WI * 0.5f;      // apply in resampling routine to remove DC offset
-    const float DITHER_AMPLITUDE   = DITHER_WI / RAND_MAX;  // 2 LSB
+    const float DITHER_DC_OFFSET   = DITHER_WI * 0.5f; // apply in resampling routine to remove DC offset
+    const float DITHER_AMPLITUDE   = 0.00003f; // -90 dBFS
+
+    // realtime-safe cross compiler agnostic variation of rand()
+    struct Randomizer {
+        uint32 state = 0x9E3779B9; // seed
+
+        inline uint32 next() {
+            state ^= state << 13;
+            state ^= state >> 17;
+            state ^= state << 5;
+            
+            return state;
+        }
+
+        // in -1 to +1 range
+        inline float nextBipolar() {
+            return ( float )( int32 ) next() * ( 1.f / 2147483648.f );
+        }
+    };
 
     public:
         static constexpr float MAX_RECORD_SECONDS = 30.f;
@@ -113,6 +131,7 @@ class PluginProcess
         float _wetMix;
         int _amountOfChannels;
         std::vector<LowPassFilter*> _lowPassFilters;
+        Randomizer _randomizer;
 
         // read/write pointers for the record buffer used for record and playback
 

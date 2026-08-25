@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2026 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -66,8 +66,9 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
     // temp variables for dithering
 
-    int r1 = 0;
-    int r2 = 0;
+    float r1 = 0;
+    float r2 = 0;
+    float dither = 0;
 
     for ( int32 c = 0; c < numInChannels; ++c )
     {
@@ -117,16 +118,18 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             curSample = lowPassFilter->applySingle( s1 + ( s2 - s1 ) * frac );
             outSample = curSample * .5f;
 
+            r2 = r1;
+            r1 = _randomizer.nextBipolar();
+            dither = DITHER_AMPLITUDE * ( r1 - r2 );
+
             int start = i;
             for ( l = std::min( bufferSize, start + _sampleIncr ); i < l; ++i ) {
-                r2 = r1;
-                r1 = rand();
 
                 nextSample = outSample + lastSample;
                 lastSample = nextSample * .25f;
 
                 // write sample into the output buffer, corrected for DC offset and dithering applied
-                channelPreMixBuffer[ i ] = nextSample + DITHER_DC_OFFSET + DITHER_AMPLITUDE * ( float )( r1 - r2 );
+                channelPreMixBuffer[ i ] = nextSample + DITHER_DC_OFFSET + dither;
 
                 // catch denormals
                 UNDENORMALISE( channelPreMixBuffer[ i ]);
