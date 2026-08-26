@@ -27,15 +27,16 @@
 
 namespace Igorski {
 
-PluginProcess::PluginProcess( int amountOfChannels, float sampleRate )
+PluginProcess::PluginProcess( int amountOfChannels, float sampleRate, int maxBufferSize )
 {
     _amountOfChannels = amountOfChannels;
     _lastSamples = new float[ amountOfChannels ];
 
     for ( int i = 0; i < amountOfChannels; ++i ) {
         _lastSamples[ i ] = 0.f;
-        _lowPassFilters.push_back( new LowPassFilter());
     }
+    _lowPassFilters.resize( amountOfChannels );
+    _makeUpGainProcessors.resize( amountOfChannels );
     _holdStates.resize( amountOfChannels );
     _filterPointers.reserve( amountOfChannels );
     _filteredCur.reserve( amountOfChannels );
@@ -70,7 +71,7 @@ PluginProcess::PluginProcess( int amountOfChannels, float sampleRate )
     _playbackRate           = 0.f;
     _actualPlaybackRate     = 1.f;
 
-    setHostSampleRate( sampleRate );
+    setHostProperties( sampleRate, maxBufferSize );
     setResampleRate( _actualDownSampleAmount );
     setPlaybackRate( _actualPlaybackRate );
 }
@@ -79,11 +80,10 @@ PluginProcess::~PluginProcess()
 {
     delete[] _lastSamples;
 
-    while ( _lowPassFilters.size() > 0 ) {
-        delete _lowPassFilters.at( 0 );
-        _lowPassFilters.erase( _lowPassFilters.begin() );
+    if ( scratchBuffer != nullptr ) {
+        delete[] scratchBuffer;
+        scratchBuffer = nullptr;
     }
-
     delete bitCrusher;
     delete limiter;
     delete _recordBuffer;
@@ -104,19 +104,31 @@ void PluginProcess::setWetMix( float value )
     _wetMix = value;
 }
 
-void PluginProcess::setHostSampleRate( float value )
+void PluginProcess::setHostProperties( float sampleRate, int maxBufferSize )
 {
     cacheMaxDownSample();
 
-    if ( _sampleRate != value ) {
-        _sampleRate = value;
+    if ( _hostSampleRate != sampleRate ) {
+        _hostSampleRate = sampleRate;
     
         setResampleRate( _downSampleNormalised );
 
-        limiter->setSampleRate( _sampleRate );
-        bitCrusher->setSampleRate( _sampleRate );
-        _downSampleLfo->setSampleRate( _sampleRate );
-        _playbackRateLfo->setSampleRate( _sampleRate );
+        limiter->setSampleRate( _hostSampleRate );
+        bitCrusher->setSampleRate( _hostSampleRate );
+        _downSampleLfo->setSampleRate( _hostSampleRate );
+        _playbackRateLfo->setSampleRate( _hostSampleRate );
+
+        for ( int c = 0; c < _amountOfChannels; ++c ) {
+            _makeUpGainProcessors.at( c ).prepare( _hostSampleRate );
+        }
+    }
+
+    if ( _hostBufferSize < maxBufferSize ) {
+        _hostBufferSize = maxBufferSize;
+        if ( scratchBuffer != nullptr ) {
+            delete[] scratchBuffer;
+        }
+        scratchBuffer = new float[ _hostBufferSize ];
     }
 }
 
@@ -134,7 +146,7 @@ void PluginProcess::setResampleRate( float value )
     float tempRatio = _actualDownSampleAmount / std::max( 0.000000001f, _downSampleAmount );
 
     // @TODO log whether this matches UI
-    _targetRate = MIN_SAMPLE_RATE + value * ( _sampleRate - MIN_SAMPLE_RATE );
+    _targetRate = MIN_SAMPLE_RATE + value * ( _hostSampleRate - MIN_SAMPLE_RATE );
     
     _downSampleNormalised = value;
     _downSampleAmount = normalisedToDownSampleAmount( value );
@@ -243,7 +255,7 @@ void PluginProcess::cacheDownSamplingValues()
 
     float ratio = 1.f + ( _actualDownSampleAmount / _maxDownSample );
     for ( int c = 0; c < _amountOfChannels; ++c ) {
-        _lowPassFilters.at( c )->setRatio( ratio );
+        _lowPassFilters.at( c ).setRatio( ratio );
     }
 }
 
@@ -262,7 +274,7 @@ void PluginProcess::cacheLfo()
 
 void PluginProcess::cacheMaxDownSample()
 {
-    _maxDownSample = _sampleRate / MIN_SAMPLE_RATE;
+    _maxDownSample = _hostSampleRate / MIN_SAMPLE_RATE;
 }
 
 void PluginProcess::setActualDownSampling( float value )

@@ -25,6 +25,7 @@
 
 #include "global.h"
 #include "audiobuffer.h"
+#include "automakeupgain.h"
 #include "bitcrusher.h"
 #include "limiter.h"
 #include "lowpassfilter.h"
@@ -74,7 +75,7 @@ class PluginProcess
         static constexpr float MIN_PLAYBACK_SPEED = .5f;
         static constexpr float MIN_SAMPLE_RATE    = 2000.f;
 
-        PluginProcess( int amountOfChannels, float sampleRate );
+        PluginProcess( int amountOfChannels, float sampleRate, int maxBufferSize );
         ~PluginProcess();
 
         // apply effect to incoming sampleBuffer contents
@@ -111,7 +112,7 @@ class PluginProcess
             return powf( _maxDownSample, 1.f - normalised );
         }
 
-        void setHostSampleRate( float value );
+        void setHostProperties( float sampleRate, int maxBufferSize );
         void setResampleRate( float value );
         void setResampleLfo( float LFORatePercentage, float LFODepth );
         void setPlaybackRate( float value );
@@ -144,8 +145,11 @@ class PluginProcess
         float _dryMix;
         float _wetMix;
         int _amountOfChannels;
-        float _sampleRate;
-        std::vector<LowPassFilter*> _lowPassFilters;
+        float _hostSampleRate;
+        int _hostBufferSize = 0;
+        float* scratchBuffer = nullptr; // used for make-up gain processing (reused per channel)
+        std::vector<AutoMakeUpGain> _makeUpGainProcessors;
+        std::vector<LowPassFilter> _lowPassFilters;
         std::vector<HoldState> _holdStates;
         Randomizer _randomizer;
 

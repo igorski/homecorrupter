@@ -17,6 +17,8 @@
 #ifndef __AUTO_MAKEUP_GAIN_H_INCLUDED__
 #define __AUTO_MAKEUP_GAIN_H_INCLUDED__
 
+#include "linearsmoothing.h"
+
 namespace Igorski {
 class AutoMakeUpGain
 {
@@ -36,6 +38,7 @@ class AutoMakeUpGain
 
     private:
         int rmsWindowSize = 0;
+        LinearSmoothing smoother;
 
         float computeRMS( const float* data, int numSamples );
 };

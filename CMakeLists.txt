@@ -128,6 +128,7 @@ set(vst_sources
     src/lfo.cpp
     src/limiter.h
     src/limiter.cpp
+    src/linearsmoothing.h
     src/lowpassfilter.h
     src/lowpassfilter.cpp
     src/paramids.h

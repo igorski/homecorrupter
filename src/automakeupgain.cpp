@@ -26,8 +26,8 @@ void AutoMakeUpGain::prepare( float sampleRate )
     rmsWindowSize = static_cast<int>( sampleRate * WINDOW_SIZE );
     rmsWindowSize = std::max( 1, rmsWindowSize );
 
-    // gainSmoothed.reset( sampleRate, GAIN_SMOOTHING );
-    // gainSmoothed.setCurrentAndTargetValue( 1.0f );
+    smoother.reset( sampleRate, GAIN_SMOOTHING );
+    smoother.setCurrentAndTargetValue( 1.0f );
 }
 
 void AutoMakeUpGain::apply( float* pre, float* post, int bufferSize  )
@@ -39,10 +39,10 @@ void AutoMakeUpGain::apply( float* pre, float* post, int bufferSize  )
 
     makeup = Calc::constrain( 0.25f, 4.0f, makeup );
 
-    // gainSmoothed.setTargetValue( makeup );
-    // float smoothGain = gainSmoothed.getNextValue();
-    // gainSmoothed.skip( bufferSize );
-    float smoothGain = makeup;
+    
+    smoother.setTargetValue( makeup );
+    float smoothGain = smoother.getNextValue();
+    smoother.skip( bufferSize );
 
     for ( int i = 0; i < bufferSize; ++i ) {
         post[ i ] *= smoothGain;

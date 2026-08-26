@@ -80,8 +80,8 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
         float* channelRecordBuffer   = _recordBuffer->getBufferForChannel( c );
         float* channelPreMixBuffer   = _preMixBuffer->getBufferForChannel( c );
 
-        LowPassFilter* lowPassFilter = _lowPassFilters.at( c );
-        HoldState hold = _holdStates.at( c );
+        auto lowPassFilter = _lowPassFilters.at( c );
+        auto hold = _holdStates.at( c );
 
         int filterPointer = _filterPointers[ c ];
         float filteredPrev = _filteredPrev[ c ];
@@ -123,7 +123,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                         idx -= _maxRecordBufferSize;
                     }
                     filteredPrev = filteredCur;
-                    filteredCur = lowPassFilter->applySingle( channelRecordBuffer[ idx ]);
+                    filteredCur = /*lowPassFilter.applySingle( */channelRecordBuffer[ idx ]; //);
                     ++filterPointer;
                 }
 
@@ -175,9 +175,17 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             }
         }
 
-        // apply bit crusher
+        // apply bit crusher (when active)
 
-        bitCrusher->process( channelPreMixBuffer, bufferSize );
+        if ( bitCrusher->isActive() ) {
+            for ( i = 0; i < bufferSize; ++i ) {
+                scratchBuffer[ i ] = channelPreMixBuffer[ i ];
+            }
+            bitCrusher->process( channelPreMixBuffer, bufferSize );
+
+            // apply make-up gain to keep volume balanced
+            _makeUpGainProcessors.at( c ).apply( scratchBuffer, channelPreMixBuffer, bufferSize );
+        }
 
         // mix the input and processed mix buffers into the output buffer
 
@@ -226,7 +234,7 @@ void PluginProcess::prepareMixBuffers( SampleType** inBuffer, int numInChannels,
     // if the record buffer wasn't created yet or the buffer size has changed
     // delete existing buffer and create new one to match properties
 
-    int idealRecordSize = Calc::secondsToBuffer( MAX_RECORD_SECONDS, _sampleRate );
+    int idealRecordSize = Calc::secondsToBuffer( MAX_RECORD_SECONDS, _hostSampleRate );
     int recordSize      = idealRecordSize + idealRecordSize % bufferSize;
 
     if ( _recordBuffer == nullptr || _recordBuffer->bufferSize != recordSize ) {

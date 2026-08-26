@@ -49,7 +49,7 @@ Homecorrupter::Homecorrupter()
     setControllerClass( VST::PluginControllerUID );
 
     // should be created on setupProcessing, this however doesn't fire for Audio Unit using auval?
-    pluginProcess = new PluginProcess( 2, VST::DEFAULT_SAMPLE_RATE );
+    pluginProcess = new PluginProcess( 2, VST::DEFAULT_SAMPLE_RATE, VST::DEFAULT_BUFFER_SIZE );
 }
 
 //------------------------------------------------------------------------
@@ -526,8 +526,8 @@ tresult PLUGIN_API Homecorrupter::setupProcessing( ProcessSetup& newSetup )
 
     // here we keep a trace of the processing mode (offline,...) for example.
     currentProcessMode = newSetup.processMode;
-
-    pluginProcess->setHostSampleRate( newSetup.sampleRate );
+ 
+    pluginProcess->setHostProperties( newSetup.sampleRate, newSetup.maxSamplesPerBlock );
 
     syncModel();
 

@@ -21,6 +21,7 @@ namespace VST {
     static const FUID PluginControllerUID( 0xB499A21C, 0x0E48FFA8, 0xC0AFA4D6, 0x749F464F );
 
     static const float DEFAULT_SAMPLE_RATE = 44100.f; // updated in vst.cpp#setupProcessing
+    static const float DEFAULT_BUFFER_SIZE = 2048; // updated in vst.cpp#setupProcessing
 
     static const float PI       = 3.141592653589793f;
     static const float TWO_PI   = PI * 2.f;
