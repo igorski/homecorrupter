@@ -38,7 +38,7 @@ BitCrusher::BitCrusher( float amount, float inputMix, float outputMix )
 
     _tempAmount = _amount;
 
-    lfo = new LFO();
+    lfo = new LFO( VST::DEFAULT_SAMPLE_RATE );
     hasLFO = false;
 }
 

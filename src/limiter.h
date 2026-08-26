@@ -32,7 +32,7 @@
 class Limiter
 {
     public:
-        Limiter();
+        Limiter( float sampleRate );
         /**
          * Unit specific constructor
          * @param attackInMicroseconds up to 1563.90 microseconds
@@ -40,19 +40,13 @@ class Limiter
          * @param thresholdNormalized 0 - 1 range where 0 == -20 dB and 1 == +20 dB
          * @param softKnee
          */
-        Limiter( float attackInMicroseconds, float releaseInMilliseconds, float thresholdNormalized, bool softKnee );
-        /**
-         * legacy constructor using normalized (0 - 1 range) values (TO BE DEPRECATED?)
-         * @param attackNormalized (1 == 1563.89 microseconds)
-         * @param releaseNormalized (1 == 1571.755 milliseconds)
-         * @param thresholdNormalized (0 == -20 dB and 1 == +20 dB)
-         */
-        Limiter( float attackNormalized, float releaseNormalized, float thresholdNormalized );
+        Limiter( float attackInMicroseconds, float releaseInMilliseconds, float thresholdNormalized, bool softKnee, float sampleRate );
         ~Limiter();
 
         template <typename SampleType>
         void process( SampleType** outputBuffer, int bufferSize, int numOutChannels );
 
+        void setSampleRate( float value );
         void setAttack( float attackNormalized );
         void setAttackMicroseconds( float attackInMicroseconds );
         void setRelease( float releaseNormalized );
@@ -64,11 +58,12 @@ class Limiter
         float getLinearGR();
 
     protected:
-        void init( float attackNormalized, float releaseNormalized, float thresholdNormalized, bool softKnee );
+        void init( float attackNormalized, float releaseNormalized, float thresholdNormalized, bool softKnee, float sampleRate );
         void cacheValues();
 
         // instance variables
 
+        float _sampleRate;
         float _threshold;
         float _trim;
         float _attack;

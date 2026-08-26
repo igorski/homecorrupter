@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2018 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2013-2026 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -29,8 +29,10 @@ namespace Igorski {
 class LFO {
 
     public:
-        LFO();
+        LFO( float sampleRate );
         ~LFO();
+
+        void setSampleRate( float value );
 
         float getRate();
         void setRate( float value );
@@ -49,16 +51,16 @@ class LFO {
         inline float peek()
         {
             // the wave table offset to read from
-            float SR_OVER_LENGTH = VST::SAMPLE_RATE / ( float ) TABLE_SIZE;
+            float SR_OVER_LENGTH = _sampleRate / ( float ) TABLE_SIZE;
             int readOffset = ( _accumulator == 0.f ) ? 0 : ( int ) ( _accumulator / SR_OVER_LENGTH );
 
             // increment the accumulators read offset
             _accumulator += _rate;
 
             // keep the accumulator within the bounds of the sample frequency
-            if ( _accumulator > VST::SAMPLE_RATE )
-                _accumulator -= VST::SAMPLE_RATE;
-
+            if ( _accumulator > _sampleRate ) {
+                _accumulator -= _sampleRate;
+            }
             // return the sample present at the calculated offset within the table
             return VST::TABLE[ readOffset ];
         }
@@ -70,6 +72,7 @@ class LFO {
 
         // used internally
 
+        float _sampleRate;
         float _rate;
         float _accumulator;   // is read offset in wave table buffer
 };

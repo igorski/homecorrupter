@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2026 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -37,8 +37,6 @@
 
 namespace Igorski {
 
-float VST::SAMPLE_RATE = 44100.f; // updated in setupProcessing()
-
 //------------------------------------------------------------------------
 // Plugin Implementation
 //------------------------------------------------------------------------
@@ -51,7 +49,7 @@ Homecorrupter::Homecorrupter()
     setControllerClass( VST::PluginControllerUID );
 
     // should be created on setupProcessing, this however doesn't fire for Audio Unit using auval?
-    pluginProcess = new PluginProcess( 2 );
+    pluginProcess = new PluginProcess( 2, VST::DEFAULT_SAMPLE_RATE );
 }
 
 //------------------------------------------------------------------------
@@ -88,13 +86,20 @@ tresult PLUGIN_API Homecorrupter::terminate()
 }
 
 //------------------------------------------------------------------------
-tresult PLUGIN_API Homecorrupter::setActive (TBool state)
+tresult PLUGIN_API Homecorrupter::setActive( TBool state )
 {
-    if (state)
+    if ( state ) {
+        Steinberg::Vst::IMessage* msg = allocateMessage();
+        if ( msg ) {
+            msg->setMessageID( "setSampleRate" );
+            msg->getAttributes()->setFloat( "sampleRate", processSetup.sampleRate );
+            sendMessage( msg );
+            msg->release();
+        }
         sendTextMessage( "Homecorrupter::setActive (true)" );
-    else
+    } else {
         sendTextMessage( "Homecorrupter::setActive (false)" );
-
+    }
     // reset output level meter
     outputGainOld = 0.f;
 
@@ -522,7 +527,7 @@ tresult PLUGIN_API Homecorrupter::setupProcessing( ProcessSetup& newSetup )
     // here we keep a trace of the processing mode (offline,...) for example.
     currentProcessMode = newSetup.processMode;
 
-    VST::SAMPLE_RATE = newSetup.sampleRate;
+    pluginProcess->setHostSampleRate( newSetup.sampleRate );
 
     syncModel();
 

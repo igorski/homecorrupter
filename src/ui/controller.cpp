@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2026 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -343,6 +343,22 @@ tresult PLUGIN_API PluginController::getState( IBStream* state )
     return kResultFalse;
 }
 
+tresult PLUGIN_API PluginController::notify( Steinberg::Vst::IMessage* message )
+{
+    if ( !message ) {
+        return Steinberg::kInvalidArgument;
+    }
+    if ( strcmp( message->getMessageID(), "setSampleRate" ) == 0 )
+    {
+        double rate = 0.0;
+        if ( message->getAttributes()->getFloat( "sampleRate", rate ) == Steinberg::kResultTrue ) {
+            this->_sampleRate = rate;
+        }
+        return Steinberg::kResultOk;
+    }
+    return Steinberg::Vst::EditController::notify( message );
+}
+
 //------------------------------------------------------------------------
 tresult PluginController::receiveText( const char* text )
 {
@@ -376,7 +392,7 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
 // --- AUTO-GENERATED GETPARAM START
 
         case kResampleRateId:
-            sprintf( text, "%.2d Hz", ( int ) (( Igorski::VST::SAMPLE_RATE - Igorski::PluginProcess::MIN_SAMPLE_RATE ) * valueNormalized ) + ( int ) Igorski::PluginProcess::MIN_SAMPLE_RATE );
+            sprintf( text, "%.2d Hz", ( int ) (( _sampleRate - Igorski::PluginProcess::MIN_SAMPLE_RATE ) * valueNormalized ) + ( int ) Igorski::PluginProcess::MIN_SAMPLE_RATE );
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 

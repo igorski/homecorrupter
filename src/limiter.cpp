@@ -30,19 +30,14 @@
 
 // constructors / destructor
 
-Limiter::Limiter()
+Limiter::Limiter( float sampleRate )
 {
-    init( 0.8f, 1.0f, 0.55f, true );
+    init( 0.8f, 1.0f, 0.55f, true, sampleRate );
 }
 
-Limiter::Limiter( float attackNormalized, float releaseNormalized, float thresholdNormalized )
+Limiter::Limiter( float attackInMicroseconds, float releaseInMilliseconds, float thresholdNormalized, bool softKnee, float sampleRate )
 {
-    init( attackNormalized, releaseNormalized, thresholdNormalized, false );
-}
-
-Limiter::Limiter( float attackInMicroseconds, float releaseInMilliseconds, float thresholdNormalized, bool softKnee )
-{
-    init( 0.f, 0.f, thresholdNormalized, softKnee );
+    init( 0.f, 0.f, thresholdNormalized, softKnee, sampleRate );
     setAttackMicroseconds( attackInMicroseconds );
     setReleaseMilliseconds( releaseInMilliseconds );
 }
@@ -54,6 +49,11 @@ Limiter::~Limiter()
 
 /* public methods */
 
+void Limiter::setSampleRate( float value )
+{
+    _sampleRate = value;
+}
+
 void Limiter::setAttack( float attackNormalized )
 {
     _attack = pow( 10.0, -2.0 * attackNormalized );
@@ -61,7 +61,7 @@ void Limiter::setAttack( float attackNormalized )
 
 void Limiter::setAttackMicroseconds( float attackInMicroseconds )
 {
-    _attack = 1.0 - Igorski::Calc::inverseLog( 1.f / ( attackInMicroseconds / -301030.1f ) / ( float ) Igorski::VST::SAMPLE_RATE, 10 );
+    _attack = 1.0 - Igorski::Calc::inverseLog( 1.f / ( attackInMicroseconds / -301030.1f ) / _sampleRate, 10 );
 }
 
 void Limiter::setRelease( float releaseNormalized )
@@ -71,7 +71,7 @@ void Limiter::setRelease( float releaseNormalized )
 
 void Limiter::setReleaseMilliseconds( float releaseInMilliseconds )
 {
-    _release = 1.0 - Igorski::Calc::inverseLog( 1.f / ( releaseInMilliseconds / -301.0301f ) / ( float ) Igorski::VST::SAMPLE_RATE, 10 );
+    _release = 1.0 - Igorski::Calc::inverseLog( 1.f / ( releaseInMilliseconds / -301.0301f ) / _sampleRate, 10 );
 }
 
 void Limiter::setThreshold( float thresholdNormalized )
@@ -98,8 +98,9 @@ float Limiter::getLinearGR()
 
 /* protected methods */
 
-void Limiter::init( float attackNormalized, float releaseNormalized, float thresholdNormalized, bool softKnee )
+void Limiter::init( float attackNormalized, float releaseNormalized, float thresholdNormalized, bool softKnee, float sampleRate )
 {
+    setSampleRate( sampleRate );
     _threshold = thresholdNormalized;
 
     float trim = 0.60f;
