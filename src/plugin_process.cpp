@@ -134,13 +134,13 @@ void PluginProcess::setHostProperties( float sampleRate, int maxBufferSize )
 
 void PluginProcess::setResampleRate( float value )
 {
-    // @TODO is this the normalised one we should use instead of value in the rest of the function??
-    // invert the sampling rate value to determine the down sampling value
-    float downSampleValue = abs( value - 1.f );
+    float normalisedDownSampleAmount = normalisedToDownSampleAmount( value );
+    
+    // no change in either resample rate or host sample rate value
+    // no need to trigger changes
 
-    // @todo what is sample rate changed, we must invalidate this!
-    if ( value == _downSampleNormalised ) {
-        return; // don't trigger changes when the value is the same
+    if ( normalisedDownSampleAmount == _downSampleAmount ) {
+        return;
     }
 
     float tempRatio = _actualDownSampleAmount / std::max( 0.000000001f, _downSampleAmount );
@@ -149,7 +149,7 @@ void PluginProcess::setResampleRate( float value )
     _targetRate = MIN_SAMPLE_RATE + value * ( _hostSampleRate - MIN_SAMPLE_RATE );
     
     _downSampleNormalised = value;
-    _downSampleAmount = normalisedToDownSampleAmount( value );
+    _downSampleAmount = normalisedDownSampleAmount;
 
     // in case down sampling is attached to oscillator, keep relative offset of currently moving wave in place
     setActualDownSampling( _hasDownSampleLfo ? _downSampleAmount * tempRatio : _downSampleAmount );
