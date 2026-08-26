@@ -41,6 +41,7 @@ class PluginProcess
     const float DITHER_WI          = 1.0f / DITHER_WORD_LENGTH;
     const float DITHER_DC_OFFSET   = DITHER_WI * 0.5f; // apply in resampling routine to remove DC offset
     const float DITHER_AMPLITUDE   = 0.00003f; // -90 dBFS
+    const float SMOOTHING          = 1.5f; // between 1 - 4
 
     // realtime-safe cross compiler agnostic variation of rand()
     struct Randomizer {
@@ -60,12 +61,20 @@ class PluginProcess
         }
     };
 
+    struct HoldState {
+        int remaining = 0;
+        int length = 1;
+        float sample = 0.f;
+        float dither = 0.f;
+        float coeff = 1.f;
+    };
+
     public:
         static constexpr float MAX_RECORD_SECONDS = 30.f;
         static constexpr float MIN_PLAYBACK_SPEED = .5f;
         static constexpr float MIN_SAMPLE_RATE    = 2000.f;
 
-        PluginProcess( int amountOfChannels );
+        PluginProcess( int amountOfChannels, float sampleRate );
         ~PluginProcess();
 
         // apply effect to incoming sampleBuffer contents
@@ -98,6 +107,11 @@ class PluginProcess
             return true;
         };
 
+        inline float normalisedToDownSampleAmount( float normalised ) {
+            return powf( _maxDownSample, 1.f - normalised );
+        }
+
+        void setHostSampleRate( float value );
         void setResampleRate( float value );
         void setResampleLfo( float LFORatePercentage, float LFODepth );
         void setPlaybackRate( float value );
@@ -130,7 +144,9 @@ class PluginProcess
         float _dryMix;
         float _wetMix;
         int _amountOfChannels;
+        float _sampleRate;
         std::vector<LowPassFilter*> _lowPassFilters;
+        std::vector<HoldState> _holdStates;
         Randomizer _randomizer;
 
         // read/write pointers for the record buffer used for record and playback
@@ -141,16 +157,20 @@ class PluginProcess
 
         // down sampling
 
-        float  _downSampleAmount; // 1 == no change (keeps at original sample rate), > 1 provides down sampling
-        float  _actualDownSampleAmount;
-        float  _maxDownSample;
+        float _downSampleNormalised;
+        float _downSampleAmount; // 1 == no change (keeps at original sample rate), > 1 provides down sampling
+        float _actualDownSampleAmount;
+        float _maxDownSample;
         float* _lastSamples; // last written sample, per channel
+        std::vector<int> _filterPointers;
+        std::vector<float> _filteredPrev;
+        std::vector<float> _filteredCur;
+        float _targetRate;
 
         // clock speed
 
         float _playbackRate;  // 1 == 100% (no change), < 1 is lower playback speed
         float _actualPlaybackRate;
-        float _fSampleIncr;
         int   _sampleIncr;
 
         // oscillators (set the "actual"downSampleAmount|playbackRate values relative to the values provided to the setters)
@@ -185,6 +205,12 @@ class PluginProcess
 
         template <typename SampleType>
         void prepareMixBuffers( SampleType** inBuffer, int numInChannels, int bufferSize );
+
+        inline void syncFilterPointers() {
+            for ( int c = 0; c < _amountOfChannels; ++c ) {
+                _filterPointers[ c ] = ( int ) _readPointer;
+            }
+        }
 };
 }
 

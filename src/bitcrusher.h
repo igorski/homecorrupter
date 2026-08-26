@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2018 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2013-2026 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,6 +23,7 @@
 #ifndef __BITCRUSHER_H_INCLUDED__
 #define __BITCRUSHER_H_INCLUDED__
 
+#include "automakeupgain.h"
 #include "lfo.h"
 
 namespace Igorski {
@@ -35,6 +36,7 @@ class BitCrusher {
         void setLFO( float LFORatePercentage, float LFODepth );
         void process( float* inBuffer, int bufferSize );
 
+        void setSampleRate( float value );
         void setAmount( float value ); // range between -1 to +1
         void setInputMix( float value );
         void setOutputMix( float value );
@@ -43,6 +45,7 @@ class BitCrusher {
         bool hasLFO;
 
     private:
+        AutoMakeUpGain makeUpGain;
         int _bits; // we scale the amount to integers in the 1-16 range
         float _amount;
         float _inputMix;

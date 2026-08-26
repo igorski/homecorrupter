@@ -27,17 +27,19 @@
 
 namespace Igorski {
 
-PluginProcess::PluginProcess( int amountOfChannels )
+PluginProcess::PluginProcess( int amountOfChannels, float sampleRate )
 {
     _amountOfChannels = amountOfChannels;
-    cacheMaxDownSample();
-
-     _lastSamples = new float[ amountOfChannels ];
+    _lastSamples = new float[ amountOfChannels ];
 
     for ( int i = 0; i < amountOfChannels; ++i ) {
         _lastSamples[ i ] = 0.f;
         _lowPassFilters.push_back( new LowPassFilter());
     }
+    _holdStates.resize( amountOfChannels );
+    _filterPointers.reserve( amountOfChannels );
+    _filteredCur.reserve( amountOfChannels );
+    _filteredPrev.reserve( amountOfChannels );
 
     _dryMix = 0.f;
     _wetMix = 1.f;
@@ -45,16 +47,16 @@ PluginProcess::PluginProcess( int amountOfChannels )
     // create the child processors
 
     bitCrusher = new BitCrusher( 1.f, .5f, 1.f );
-    limiter    = new Limiter( 0.3f, 0.5f, 0.9f, true );
+    limiter    = new Limiter( 0.3f, 0.5f, 0.9f, true, sampleRate );
 
     // buffers will be lazily created in the process function as they correspond to the host buffer size
     _recordBuffer  = nullptr;
     _preMixBuffer  = nullptr;
 
     // oscillators
-    _downSampleLfo      = new LFO();
+    _downSampleLfo      = new LFO( sampleRate );
     _hasDownSampleLfo   = false;
-    _playbackRateLfo    = new LFO();
+    _playbackRateLfo    = new LFO( sampleRate );
     _hasPlaybackRateLfo = false;
 
     // read / write variables
@@ -62,12 +64,14 @@ PluginProcess::PluginProcess( int amountOfChannels )
     _readPointer  = 0.f;
     _writePointer = 0;
 
+    _downSampleNormalised   = 0.f;
     _downSampleAmount       = 0.f;
     _actualDownSampleAmount = 1.f;
     _playbackRate           = 0.f;
     _actualPlaybackRate     = 1.f;
 
-    setResampleRate( _actualDownSampleAmount);
+    setHostSampleRate( sampleRate );
+    setResampleRate( _actualDownSampleAmount );
     setPlaybackRate( _actualPlaybackRate );
 }
 
@@ -100,23 +104,40 @@ void PluginProcess::setWetMix( float value )
     _wetMix = value;
 }
 
+void PluginProcess::setHostSampleRate( float value )
+{
+    cacheMaxDownSample();
+
+    if ( _sampleRate != value ) {
+        _sampleRate = value;
+    
+        setResampleRate( _downSampleNormalised );
+
+        limiter->setSampleRate( _sampleRate );
+        bitCrusher->setSampleRate( _sampleRate );
+        _downSampleLfo->setSampleRate( _sampleRate );
+        _playbackRateLfo->setSampleRate( _sampleRate );
+    }
+}
+
 void PluginProcess::setResampleRate( float value )
 {
+    // @TODO is this the normalised one we should use instead of value in the rest of the function??
     // invert the sampling rate value to determine the down sampling value
     float downSampleValue = abs( value - 1.f );
-    float scaledAmount    = Calc::scale( downSampleValue, 1.f, _maxDownSample - 1.f ) + 1.f;
 
-    if ( scaledAmount == _downSampleAmount ) {
-        return; // don't trigger changes if value is the same
+    // @todo what is sample rate changed, we must invalidate this!
+    if ( value == _downSampleNormalised ) {
+        return; // don't trigger changes when the value is the same
     }
-//    else if ( _recordBuffer != nullptr ) {
-//        float ratio  = scaledAmount / _downSampleAmount;
-//        _readPointer = std::max( 0.f, std::min(( float ) _recordBuffer->bufferSize - 1.f, ( float ) _writePointer * ratio ));
-//    }
 
     float tempRatio = _actualDownSampleAmount / std::max( 0.000000001f, _downSampleAmount );
 
-    _downSampleAmount = scaledAmount;
+    // @TODO log whether this matches UI
+    _targetRate = MIN_SAMPLE_RATE + value * ( _sampleRate - MIN_SAMPLE_RATE );
+    
+    _downSampleNormalised = value;
+    _downSampleAmount = normalisedToDownSampleAmount( value );
 
     // in case down sampling is attached to oscillator, keep relative offset of currently moving wave in place
     setActualDownSampling( _hasDownSampleLfo ? _downSampleAmount * tempRatio : _downSampleAmount );
@@ -201,6 +222,7 @@ void PluginProcess::resetReadWritePointers()
 {
     _readPointer  = 0.f;
     _writePointer = 0;
+    syncFilterPointers();
 }
 
 void PluginProcess::clearBuffer()
@@ -214,8 +236,8 @@ void PluginProcess::clearBuffer()
 
 void PluginProcess::cacheDownSamplingValues()
 {
-    _fSampleIncr = std::max( 1.f, floor( _actualDownSampleAmount ));
-    _sampleIncr  = ( int ) _fSampleIncr;
+    _sampleIncr = ( int ) roundf( _actualDownSampleAmount );
+    _sampleIncr = std::max( 1, std::min( _sampleIncr, ( int ) _maxDownSample ));
 
     // update the lowpass filters to the appropriate cutoff
 
@@ -240,7 +262,7 @@ void PluginProcess::cacheLfo()
 
 void PluginProcess::cacheMaxDownSample()
 {
-    _maxDownSample = VST::SAMPLE_RATE / MIN_SAMPLE_RATE;
+    _maxDownSample = _sampleRate / MIN_SAMPLE_RATE;
 }
 
 void PluginProcess::setActualDownSampling( float value )
@@ -254,6 +276,7 @@ void PluginProcess::setActualDownSampling( float value )
 
     if ( wasDownSampled && !isDownSampled() && !_hasDownSampleLfo && !isSlowedDown() && !_hasPlaybackRateLfo ) {
         _readPointer = ( float ) _writePointer;
+        syncFilterPointers();
     }
 }
 
@@ -267,6 +290,7 @@ void PluginProcess::setActualPlaybackRate( float value )
 
     if ( wasSlowedDown && !isSlowedDown() && !_hasPlaybackRateLfo && !isDownSampled() ) {
         _readPointer = ( float ) _writePointer;
+        syncFilterPointers();
     }
 }
 

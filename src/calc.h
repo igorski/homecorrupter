@@ -102,6 +102,14 @@ namespace Calc {
         return ( float ) ( std::min( maxValue, value ) * ratio );
     }
 
+    inline float constrain( float lowerLimit, float upperLimit, float valueToConstrain )
+    {
+        if ( valueToConstrain < lowerLimit ) {
+            return lowerLimit;
+        }
+        return upperLimit < valueToConstrain ? upperLimit : valueToConstrain;
+    }
+
     // cast a floating point value to a boolean true/false
 
     inline bool toBool( float value )

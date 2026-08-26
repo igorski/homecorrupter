@@ -85,8 +85,12 @@ void BitCrusher::process( float* inBuffer, int bufferSize )
 
     int bitsPlusOne = _bits + 1;
 
+    auto preBuffer = new float[ bufferSize ];
+
     for ( int i = 0; i < bufferSize; ++i )
     {
+        preBuffer[ i ] = inBuffer[ i ];
+
         short input = ( short ) (( inBuffer[ i ] * _inputMix ) * SHRT_MAX );
         short prevent_offset = ( short )( -1 >> bitsPlusOne );
         input &= ( -1 << ( 16 - _bits ));
@@ -102,9 +106,18 @@ void BitCrusher::process( float* inBuffer, int bufferSize )
             bitsPlusOne = _bits + 1;
         }
     }
+
+    makeUpGain.apply( preBuffer, inBuffer, bufferSize );
+    delete[] preBuffer; // @TODO make less wasteful (resizable vector?)
 }
 
 /* setters */
+
+void BitCrusher::setSampleRate( float value )
+{
+    lfo->setSampleRate( value );
+    makeUpGain.prepare( value );
+}
 
 void BitCrusher::setAmount( float value )
 {

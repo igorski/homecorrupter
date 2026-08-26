@@ -636,13 +636,6 @@ void Homecorrupter::syncModel()
     pluginProcess->bitCrusher->setAmount( fBitDepth );
     pluginProcess->setPlaybackRate( fPlaybackRate );
 
-    // note we attenuate the signal at lower bit depths as the dynamic range decreases and volume builds up
-    if ( fBitDepth == 1.f ) {
-        pluginProcess->bitCrusher->setOutputMix( 1.f );
-    } else {
-        pluginProcess->bitCrusher->setOutputMix( fBitDepth > .4f ? 1.25f : .25f );
-    }
-
     // oscillators
     pluginProcess->setResampleLfo( fResampleLfo, fResampleLfoDepth );
     pluginProcess->setPlaybackRateLfo( fPlaybackRateLfo, fPlaybackRateLfoDepth );
