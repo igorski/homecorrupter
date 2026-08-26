@@ -38,13 +38,12 @@ BitCrusher::BitCrusher( float amount, float inputMix, float outputMix )
 
     _tempAmount = _amount;
 
-    lfo = new LFO( VST::DEFAULT_SAMPLE_RATE );
     hasLFO = false;
 }
 
 BitCrusher::~BitCrusher()
 {
-    delete lfo;
+    // nowt...
 }
 
 /* public methods */
@@ -59,7 +58,7 @@ void BitCrusher::setLFO( float LFORatePercentage, float LFODepth )
     bool hadChange = ( wasEnabled != enabled ) || _lfoDepth != LFODepth;
 
     if ( enabled )
-        lfo->setRate(
+        lfo.setRate(
             VST::MIN_LFO_RATE() + (
                 LFORatePercentage * ( VST::MAX_LFO_RATE() - VST::MIN_LFO_RATE() )
             )
@@ -95,7 +94,7 @@ void BitCrusher::process( float* inBuffer, int bufferSize )
 
         if ( hasLFO ) {
             // multiply by .5 and add .5 to make the LFO's bipolar waveform unipolar
-            float lfoValue = lfo->peek() * .5f  + .5f;
+            float lfoValue = lfo.peek() * .5f  + .5f;
             _tempAmount = std::min( _lfoMax, _lfoMin + _lfoRange * lfoValue );
 
             // recalculate the current resolution
@@ -109,7 +108,7 @@ void BitCrusher::process( float* inBuffer, int bufferSize )
 
 void BitCrusher::setSampleRate( float value )
 {
-    lfo->setSampleRate( value );
+    lfo.setSampleRate( value );
 }
 
 void BitCrusher::setAmount( float value )

@@ -179,8 +179,8 @@ class PluginProcess
 
         // oscillators (set the "actual"downSampleAmount|playbackRate values relative to the values provided to the setters)
 
-        LFO* _downSampleLfo;
-        LFO* _playbackRateLfo;
+        LFO _downSampleLfo;
+        LFO _playbackRateLfo;
 
         bool  _hasDownSampleLfo;
         float _downSampleLfoDepth;

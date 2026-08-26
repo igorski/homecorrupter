@@ -55,9 +55,7 @@ PluginProcess::PluginProcess( int amountOfChannels, float sampleRate, int maxBuf
     _preMixBuffer  = nullptr;
 
     // oscillators
-    _downSampleLfo      = new LFO( sampleRate );
     _hasDownSampleLfo   = false;
-    _playbackRateLfo    = new LFO( sampleRate );
     _hasPlaybackRateLfo = false;
 
     // read / write variables
@@ -88,8 +86,6 @@ PluginProcess::~PluginProcess()
     delete limiter;
     delete _recordBuffer;
     delete _preMixBuffer;
-    delete _downSampleLfo;
-    delete _playbackRateLfo;
 }
 
 /* setters */
@@ -115,8 +111,8 @@ void PluginProcess::setHostProperties( float sampleRate, int maxBufferSize )
 
         limiter->setSampleRate( _hostSampleRate );
         bitCrusher->setSampleRate( _hostSampleRate );
-        _downSampleLfo->setSampleRate( _hostSampleRate );
-        _playbackRateLfo->setSampleRate( _hostSampleRate );
+        _downSampleLfo.setSampleRate( _hostSampleRate );
+        _playbackRateLfo.setSampleRate( _hostSampleRate );
 
         for ( int c = 0; c < _amountOfChannels; ++c ) {
             _makeUpGainProcessors.at( c ).prepare( _hostSampleRate );
@@ -166,7 +162,7 @@ void PluginProcess::setResampleLfo( float LFORatePercentage, float LFODepth )
     bool hadChange = ( wasEnabled != enabled ) || _downSampleLfoDepth != LFODepth;
 
     if ( enabled )
-        _downSampleLfo->setRate(
+        _downSampleLfo.setRate(
             VST::MIN_LFO_RATE() + (
                 LFORatePercentage * ( VST::MAX_LFO_RATE() - VST::MIN_LFO_RATE() )
             )
@@ -213,7 +209,7 @@ void PluginProcess::setPlaybackRateLfo( float LFORatePercentage, float LFODepth 
     bool hadChange = ( wasEnabled != enabled ) || _playbackRateLfoDepth != LFODepth;
 
     if ( enabled )
-        _playbackRateLfo->setRate(
+        _playbackRateLfo.setRate(
             VST::MIN_LFO_RATE() + (
                 LFORatePercentage * ( VST::MAX_LFO_RATE() - VST::MIN_LFO_RATE() )
             )

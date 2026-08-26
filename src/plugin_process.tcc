@@ -60,8 +60,8 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
     // cache oscillator positions (are reset for each channel where the last iteration is saved)
 
-    float downSampleLfoAcc   = _downSampleLfo->getAccumulator();
-    float playbackRateLfoAcc = _playbackRateLfo->getAccumulator();
+    float downSampleLfoAcc   = _downSampleLfo.getAccumulator();
+    float playbackRateLfoAcc = _playbackRateLfo.getAccumulator();
     float lfoValue;
 
     // temp variables for dithering
@@ -87,8 +87,8 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
         float filteredPrev = _filteredPrev[ c ];
         float filteredCur = _filteredCur[ c ];
 
-        _downSampleLfo->setAccumulator( downSampleLfoAcc );
-        _playbackRateLfo->setAccumulator( playbackRateLfoAcc );
+        _downSampleLfo.setAccumulator( downSampleLfoAcc );
+        _playbackRateLfo.setAccumulator( playbackRateLfoAcc );
 
         float lastSample = _lastSamples[ c ];
 
@@ -163,13 +163,13 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                 // run the oscillators, note we multiply by .5 and add .5 to make the LFO's bipolar waveforms unipolar
 
                 if ( _hasDownSampleLfo ) {
-                    lfoValue = _downSampleLfo->peek() * .5f + .5f;
+                    lfoValue = _downSampleLfo.peek() * .5f + .5f;
                     setActualDownSampling( std::min( _downSampleLfoMax, _downSampleLfoMin + _downSampleLfoRange * lfoValue ) * _maxDownSample );
                     // @todo do we need to reset l here (as before) ?
                 }
 
                 if ( _hasPlaybackRateLfo ) {
-                    lfoValue = _playbackRateLfo->peek() * .5f + .5f;
+                    lfoValue = _playbackRateLfo.peek() * .5f + .5f;
                     setActualPlaybackRate( std::min( _playbackRateLfoMax, _playbackRateLfoMin + _playbackRateLfoRange * lfoValue ));
                 }
             }

@@ -40,7 +40,7 @@ class BitCrusher {
         void setInputMix( float value );
         void setOutputMix( float value );
 
-        LFO* lfo;
+        LFO lfo;
         bool hasLFO;
 
         inline bool isActive() {
