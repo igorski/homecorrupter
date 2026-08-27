@@ -132,7 +132,7 @@ void PluginProcess::setResampleRate( float value )
 
     float tempRatio = _actualDownSampleAmount / std::max( 0.000000001f, _downSampleAmount );
 
-    // @TODO log whether this matches UI
+    // this should reflect the value visible in the UI
     _targetRate = MIN_SAMPLE_RATE + value * ( _hostSampleRate - MIN_SAMPLE_RATE );
     
     _downSampleNormalised = value;
