@@ -56,7 +56,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
     int maxBufferPos  = bufferSize - 1;
     int maxReadOffset = _writePointer + maxBufferPos; // never read beyond the range of the current incoming input
 
-    float curSample, outSample;
+    float curSample;
 
     // cache oscillator positions (are reset for each channel where the last iteration is saved)
 
@@ -98,7 +98,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
             if ( writePointer > recordMax ) {
                 writePointer = 0;
             }
-            channelRecordBuffer[ writePointer ] = ( float ) channelInBuffer[ i ];
+            channelRecordBuffer[ writePointer ] = static_cast<float>( channelInBuffer[ i ] );
         }
 
         // write current read range into the premix buffer, downsampling as necessary
@@ -108,7 +108,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
         while ( i < bufferSize ) {
 
             if ( state.remaining == 0 ) {
-                t  = ( int ) readPointer;
+                t = static_cast<int>( readPointer );
                 frac = readPointer - t;
                 
                 // advance the anti alias filter at host rate through every sample we will read
@@ -131,17 +131,17 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                 state.length = _sampleIncr;
                 state.remaining = state.length;
                 state.sample = curSample * .667f;
-                state.coeff = std::min( 1.f, SMOOTHING / ( float ) state.length );
+                state.coeff = std::min( 1.f, SMOOTHING / static_cast<float>( state.length ));
 
                 r2 = r1;
                 r1 = _randomizer.nextBipolar();
                 state.dither = DITHER_AMPLITUDE * ( r1 - r2 );
 
-                float incr = ( float ) state.length * _actualPlaybackRate;
+                float incr = static_cast<float>( state.length ) * _actualPlaybackRate;
 
                 if (( readPointer += incr ) > maxReadOffset ) {
-                    readPointer = ( float ) writePointer;
-                    filterPointer = ( int ) readPointer;
+                    readPointer = static_cast<float>( writePointer );
+                    filterPointer = static_cast<int>( readPointer );
                 }
             }
 
@@ -196,7 +196,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
             // wet mix (e.g. the effected signal)
 
-            channelOutBuffer[ i ] = Calc::capSample(( SampleType ) channelPreMixBuffer[ i ] * wetMix );
+            channelOutBuffer[ i ] = Calc::capSample( static_cast<SampleType>( channelPreMixBuffer[ i ]) * wetMix );
 
             // dry mix (e.g. mix in the input signal)
 

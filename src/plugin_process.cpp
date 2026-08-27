@@ -235,8 +235,8 @@ void PluginProcess::clearBuffer()
 
 void PluginProcess::cacheDownSamplingValues()
 {
-    _sampleIncr = ( int ) roundf( _actualDownSampleAmount );
-    _sampleIncr = std::max( 1, std::min( _sampleIncr, ( int ) _maxDownSample ));
+    _sampleIncr = static_cast<int>( roundf( _actualDownSampleAmount ));
+    _sampleIncr = std::max( 1, std::min( _sampleIncr, static_cast<int>( _maxDownSample )));
 
     // update the lowpass filters to the appropriate cutoff
 
@@ -274,7 +274,7 @@ void PluginProcess::setActualDownSampling( float value )
     // and no playback slowdown taking place: sync the read pointer with the write pointer
 
     if ( wasDownSampled && !isDownSampled() && !_hasDownSampleLfo && !isSlowedDown() && !_hasPlaybackRateLfo ) {
-        _readPointer = ( float ) _writePointer;
+        _readPointer = static_cast<float>( _writePointer );
         syncFilterPointers();
     }
 }
@@ -288,7 +288,7 @@ void PluginProcess::setActualPlaybackRate( float value )
     // and no down sampling taking place: sync the read pointer with the write pointer
 
     if ( wasSlowedDown && !isSlowedDown() && !_hasPlaybackRateLfo && !isDownSampled() ) {
-        _readPointer = ( float ) _writePointer;
+        _readPointer = static_cast<float>( _writePointer );
         syncFilterPointers();
     }
 }

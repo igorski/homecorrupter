@@ -208,7 +208,7 @@ class PluginProcess
 
         inline void syncFilterPointers() {
             for ( int c = 0; c < _amountOfChannels; ++c ) {
-                _channelStates[ c ].filterPointer = ( int ) _readPointer;
+                _channelStates[ c ].filterPointer = static_cast<int>( _readPointer );
             }
         }
 };
