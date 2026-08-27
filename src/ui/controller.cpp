@@ -21,7 +21,6 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include "../global.h"
-#include "../plugin_process.h"
 #include "controller.h"
 #include "uimessagecontroller.h"
 #include "../paramids.h"
@@ -392,7 +391,7 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
 // --- AUTO-GENERATED GETPARAM START
 
         case kResampleRateId:
-            sprintf( text, "%.2d Hz", ( int ) (( _sampleRate - Igorski::PluginProcess::MIN_SAMPLE_RATE ) * valueNormalized ) + ( int ) Igorski::PluginProcess::MIN_SAMPLE_RATE );
+            sprintf( text, "%.2d Hz", ( int ) (( _sampleRate - Igorski::VST::MIN_SAMPLE_RATE ) * valueNormalized ) + ( int ) Igorski::VST::MIN_SAMPLE_RATE );
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
@@ -402,7 +401,7 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
             return kResultTrue;
 
         case kPlaybackRateId:
-            sprintf( text, "%.2d %%", ( int ) (( valueNormalized * ( 100.f * Igorski::PluginProcess::MIN_PLAYBACK_SPEED )) + ( Igorski::PluginProcess::MIN_PLAYBACK_SPEED * 100 )));
+            sprintf( text, "%.2d %%", ( int ) (( valueNormalized * ( 100.f * Igorski::VST::MIN_PLAYBACK_SPEED )) + ( Igorski::VST::MIN_PLAYBACK_SPEED * 100 )));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
@@ -457,21 +456,48 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
 //------------------------------------------------------------------------
 tresult PLUGIN_API PluginController::getParamValueByString( ParamID tag, TChar* string, ParamValue& valueNormalized )
 {
-    /* example, but better to use a custom Parameter as seen in RangeParameter
-    switch (tag)
+    switch ( tag )
     {
-        case kAttackId:
+        case kResampleRateId:
         {
-            Steinberg::UString wrapper ((TChar*)string, -1); // don't know buffer size here!
+            Steinberg::UString wrapper (( TChar* ) string, -1 );
             double tmp = 0.0;
-            if (wrapper.scanFloat (tmp))
+            if ( wrapper.scanFloat( tmp ))
             {
-                valueNormalized = expf (logf (10.f) * (float)tmp / 20.f);
+                tmp -= Igorski::VST::MIN_SAMPLE_RATE;
+                tmp = fmax( 0.0, fmin( _sampleRate, tmp ));
+                valueNormalized = tmp / ( _sampleRate - Igorski::VST::MIN_SAMPLE_RATE );
                 return kResultTrue;
             }
             return kResultFalse;
         }
-    }*/
+        case kBitDepthId:
+        {
+            Steinberg::UString wrapper (( TChar* ) string, -1 );
+            int64 tmp = 0.0;
+            if ( wrapper.scanInt( tmp ))
+            {
+                tmp = std::max( 1L, std::min( 16L, ( long ) tmp ));
+                valueNormalized = static_cast<float>( tmp ) / 16.f;
+                return kResultTrue;
+            }
+            return kResultFalse;
+        }
+        case kResampleLfoDepthId:
+        case kBitCrushLfoDepthId:
+        case kPlaybackRateLfoDepthId:
+        {
+            Steinberg::UString wrapper (( TChar* ) string, -1 );
+            double tmp = 0.0;
+            if ( wrapper.scanFloat( tmp ))
+            {
+                tmp /= 100;
+                valueNormalized = fmax( 0.0, fmin( 1.0, tmp ));
+                return kResultTrue;
+            }
+            return kResultFalse;
+        }
+    }
     return EditControllerEx1::getParamValueByString( tag, string, valueNormalized );
 }
 

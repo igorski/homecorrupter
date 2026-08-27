@@ -133,7 +133,7 @@ void PluginProcess::setResampleRate( float value )
     float tempRatio = _actualDownSampleAmount / std::max( 0.000000001f, _downSampleAmount );
 
     // this should reflect the value visible in the UI
-    _targetRate = MIN_SAMPLE_RATE + value * ( _hostSampleRate - MIN_SAMPLE_RATE );
+    _targetRate = VST::MIN_SAMPLE_RATE + value * ( _hostSampleRate - VST::MIN_SAMPLE_RATE );
     
     _downSampleNormalised = value;
     _downSampleAmount = normalisedDownSampleAmount;
@@ -176,7 +176,7 @@ void PluginProcess::setPlaybackRate( float value )
     float tempRatio = _actualPlaybackRate / std::max( 0.000000001f, _playbackRate );
 
     // rate is in 0 - 1 range, playback rate speed support is between 0.5 (half speed) - 1.0f (full speed)
-    float scaledAmount = Calc::scale( value, 1, MIN_PLAYBACK_SPEED ) + MIN_PLAYBACK_SPEED;
+    float scaledAmount = Calc::scale( value, 1, VST::MIN_PLAYBACK_SPEED ) + VST::MIN_PLAYBACK_SPEED;
 
     if ( scaledAmount == _playbackRate ) {
         return; // don't trigger changes if value is the same
@@ -261,7 +261,7 @@ void PluginProcess::cacheLfo()
 
 void PluginProcess::cacheMaxDownSample()
 {
-    _maxDownSample = _hostSampleRate / MIN_SAMPLE_RATE;
+    _maxDownSample = _hostSampleRate / VST::MIN_SAMPLE_RATE;
 }
 
 void PluginProcess::setActualDownSampling( float value )

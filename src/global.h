@@ -27,6 +27,12 @@ namespace VST {
     static const float TWO_PI   = PI * 2.f;
     static const float SQRT_TWO = sqrt( 2 );
 
+    // plugin properties
+
+    static const float MAX_RECORD_SECONDS = 30.f;
+    static const float MIN_PLAYBACK_SPEED = .5f;
+    static const float MIN_SAMPLE_RATE    = 2000.f;
+
     // maximum and minimum rate of oscillation in Hz
     // also see plugin.uidesc to update the controls to match
 

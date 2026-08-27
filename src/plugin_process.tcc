@@ -232,7 +232,7 @@ void PluginProcess::prepareMixBuffers( SampleType** inBuffer, int numInChannels,
     // if the record buffer wasn't created yet or the buffer size has changed
     // delete existing buffer and create new one to match properties
 
-    int idealRecordSize = Calc::secondsToBuffer( MAX_RECORD_SECONDS, _hostSampleRate );
+    int idealRecordSize = Calc::secondsToBuffer( VST::MAX_RECORD_SECONDS, _hostSampleRate );
     int recordSize      = idealRecordSize + idealRecordSize % bufferSize;
 
     if ( _recordBuffer == nullptr || _recordBuffer->bufferSize != recordSize ) {

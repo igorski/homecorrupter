@@ -75,10 +75,6 @@ class PluginProcess
     };
 
     public:
-        static constexpr float MAX_RECORD_SECONDS = 30.f;
-        static constexpr float MIN_PLAYBACK_SPEED = .5f;
-        static constexpr float MIN_SAMPLE_RATE    = 2000.f;
-
         PluginProcess( int amountOfChannels, float sampleRate, int maxBufferSize );
         ~PluginProcess();
 
