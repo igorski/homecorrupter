@@ -62,12 +62,16 @@ class PluginProcess
         }
     };
 
-    struct HoldState {
+    struct ChannelState {
         int remaining = 0;
         int length = 1;
         float sample = 0.f;
         float dither = 0.f;
         float coeff = 1.f;
+        float lastSample = 0.f; // last written value
+        int filterPointer = 0; // pointer at relevant index in lowpass filtered record buffer
+        float filteredPrev = 0.f; // last filtered sample
+        float filteredCur = 0.f; // next/current filtered sample
     };
 
     public:
@@ -147,10 +151,10 @@ class PluginProcess
         int _amountOfChannels;
         float _hostSampleRate;
         int _hostBufferSize = 0;
-        float* scratchBuffer = nullptr; // used for make-up gain processing (reused per channel)
+        float* _scratchBuffer = nullptr; // used for make-up gain processing (reused per channel)
         std::vector<AutoMakeUpGain> _makeUpGainProcessors;
         std::vector<LowPassFilter> _lowPassFilters;
-        std::vector<HoldState> _holdStates;
+        std::vector<ChannelState> _channelStates;
         Randomizer _randomizer;
 
         // read/write pointers for the record buffer used for record and playback
@@ -165,10 +169,6 @@ class PluginProcess
         float _downSampleAmount; // 1 == no change (keeps at original sample rate), > 1 provides down sampling
         float _actualDownSampleAmount;
         float _maxDownSample;
-        float* _lastSamples; // last written sample, per channel
-        std::vector<int> _filterPointers;
-        std::vector<float> _filteredPrev;
-        std::vector<float> _filteredCur;
         float _targetRate;
 
         // clock speed
@@ -212,7 +212,7 @@ class PluginProcess
 
         inline void syncFilterPointers() {
             for ( int c = 0; c < _amountOfChannels; ++c ) {
-                _filterPointers[ c ] = ( int ) _readPointer;
+                _channelStates[ c ].filterPointer = ( int ) _readPointer;
             }
         }
 };

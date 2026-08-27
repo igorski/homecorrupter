@@ -36,14 +36,14 @@ void AutoMakeUpGain::prepare( float sampleRate )
     smoother.setCurrentAndTargetValue( 1.0f );
 }
 
-void AutoMakeUpGain::apply( float* pre, float* post, int bufferSize  )
+void AutoMakeUpGain::apply( float* pre, float* post, int bufferSize, float maxBoost )
 {
     float inRMS  = computeRMS( pre, bufferSize );
     float outRMS = computeRMS( post, bufferSize );
 
     float makeup = ( outRMS > 1e-9f ) ? ( inRMS / outRMS ) : 1.0f;
 
-    makeup = Calc::constrain( 0.25f, 4.0f, makeup );
+    makeup = Calc::constrain( 0.25f, maxBoost, makeup );
 
     
     smoother.setTargetValue( makeup );

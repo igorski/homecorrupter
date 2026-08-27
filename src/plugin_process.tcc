@@ -80,17 +80,17 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
         float* channelRecordBuffer   = _recordBuffer->getBufferForChannel( c );
         float* channelPreMixBuffer   = _preMixBuffer->getBufferForChannel( c );
 
-        auto lowPassFilter = _lowPassFilters.at( c );
-        auto hold = _holdStates.at( c );
+        LowPassFilter lowPassFilter = _lowPassFilters[ c ];
+        ChannelState& state = _channelStates[ c ];
 
-        int filterPointer = _filterPointers[ c ];
-        float filteredPrev = _filteredPrev[ c ];
-        float filteredCur = _filteredCur[ c ];
+        int filterPointer = state.filterPointer;
+        float filteredPrev = state.filteredPrev;
+        float filteredCur = state.filteredCur;
 
         _downSampleLfo.setAccumulator( downSampleLfoAcc );
         _playbackRateLfo.setAccumulator( playbackRateLfoAcc );
 
-        float lastSample = _lastSamples[ c ];
+        float lastSample = state.lastSample;
 
         // write input into the record buffer (converting to float when necessary)
 
@@ -107,11 +107,8 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
         while ( i < bufferSize ) {
 
-            if ( hold.remaining == 0 ) {
+            if ( state.remaining == 0 ) {
                 t  = ( int ) readPointer;
-                // if ( t > recordMax ) {
-                //    t -= _maxRecordBufferSize;
-                // }
                 frac = readPointer - t;
                 
                 // advance the anti alias filter at host rate through every sample we will read
@@ -123,7 +120,7 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                         idx -= _maxRecordBufferSize;
                     }
                     filteredPrev = filteredCur;
-                    filteredCur = /*lowPassFilter.applySingle( */channelRecordBuffer[ idx ]; //);
+                    filteredCur = /* lowPassFilter.applySingle( */ channelRecordBuffer[ idx ]; // );
                     ++filterPointer;
                 }
 
@@ -131,16 +128,16 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
 
                 curSample = filteredPrev + ( filteredCur - filteredPrev ) * frac;
 
-                hold.length = _sampleIncr;
-                hold.remaining = hold.length;
-                hold.sample = curSample * .667f;
-                hold.coeff = std::min( 1.f, SMOOTHING / ( float ) hold.length );
+                state.length = _sampleIncr;
+                state.remaining = state.length;
+                state.sample = curSample * .667f;
+                state.coeff = std::min( 1.f, SMOOTHING / ( float ) state.length );
 
                 r2 = r1;
                 r1 = _randomizer.nextBipolar();
-                hold.dither = DITHER_AMPLITUDE * ( r1 - r2 );
+                state.dither = DITHER_AMPLITUDE * ( r1 - r2 );
 
-                float incr = ( float ) hold.length * _actualPlaybackRate;
+                float incr = ( float ) state.length * _actualPlaybackRate;
 
                 if (( readPointer += incr ) > maxReadOffset ) {
                     readPointer = ( float ) writePointer;
@@ -148,17 +145,17 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                 }
             }
 
-            for ( l = i + std::min( bufferSize - i, hold.remaining ); i < l; ++i ) {
+            for ( l = i + std::min( bufferSize - i, state.remaining ); i < l; ++i ) {
 
-                lastSample += ( hold.sample - lastSample ) * hold.coeff;
+                lastSample += ( state.sample - lastSample ) * state.coeff;
                 
                 // write sample into the output buffer, corrected for DC offset and dithering applied
-                channelPreMixBuffer[ i ] = lastSample + DITHER_DC_OFFSET + hold.dither;
+                channelPreMixBuffer[ i ] = lastSample + DITHER_DC_OFFSET + state.dither;
 
                 // catch denormals
                 UNDENORMALISE( channelPreMixBuffer[ i ]);
 
-                --hold.remaining;
+                --state.remaining;
 
                 // run the oscillators, note we multiply by .5 and add .5 to make the LFO's bipolar waveforms unipolar
 
@@ -178,13 +175,14 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
         // apply bit crusher (when active)
 
         if ( bitCrusher->isActive() ) {
-            for ( i = 0; i < bufferSize; ++i ) {
-                scratchBuffer[ i ] = channelPreMixBuffer[ i ];
-            }
+            std::memcpy( _scratchBuffer, channelPreMixBuffer, bufferSize * sizeof( float ));
+
             bitCrusher->process( channelPreMixBuffer, bufferSize );
 
-            // apply make-up gain to keep volume balanced
-            _makeUpGainProcessors.at( c ).apply( scratchBuffer, channelPreMixBuffer, bufferSize );
+            float maxBoost = bitCrusher->getBits() <= 2 ? 0.5f : 4.0f; 
+
+            // apply make-up gain to keep volume balanced between non-bit crushed scratch buffer and crushed pre mix buffer
+            _makeUpGainProcessors[ c ].apply( _scratchBuffer, channelPreMixBuffer, bufferSize, maxBoost  );
         }
 
         // mix the input and processed mix buffers into the output buffer
@@ -206,11 +204,11 @@ void PluginProcess::process( SampleType** inBuffer, SampleType** outBuffer, int 
                 channelOutBuffer[ i ] += ( inSample * dryMix );
             }
         }
-        // update channel properties
-        _lastSamples[ c ] = lastSample;
-        _filterPointers[ c ] = filterPointer;
-        _filteredPrev[ c ] = filteredPrev;
-        _filteredCur[ c ] = filteredCur;
+        // update channel state
+        state.lastSample = lastSample;
+        state.filterPointer = filterPointer;
+        state.filteredPrev = filteredPrev;
+        state.filteredCur = filteredCur;
     }
     // update read/write indices
     _readPointer  = readPointer;

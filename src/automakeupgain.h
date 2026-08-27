@@ -40,7 +40,7 @@ class AutoMakeUpGain
          * Apply makeup gain to make the differences between
          * provided pre- and post buffer states smaller
          */
-        void apply( float* pre, float* post, int bufferSize );
+        void apply( float* pre, float* post, int bufferSize, float maxBoost );
 
     private:
         int rmsWindowSize = 0;

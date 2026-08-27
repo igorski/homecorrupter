@@ -30,17 +30,10 @@ namespace Igorski {
 PluginProcess::PluginProcess( int amountOfChannels, float sampleRate, int maxBufferSize )
 {
     _amountOfChannels = amountOfChannels;
-    _lastSamples = new float[ amountOfChannels ];
 
-    for ( int i = 0; i < amountOfChannels; ++i ) {
-        _lastSamples[ i ] = 0.f;
-    }
     _lowPassFilters.resize( amountOfChannels );
     _makeUpGainProcessors.resize( amountOfChannels );
-    _holdStates.resize( amountOfChannels );
-    _filterPointers.reserve( amountOfChannels );
-    _filteredCur.reserve( amountOfChannels );
-    _filteredPrev.reserve( amountOfChannels );
+    _channelStates.resize( amountOfChannels );
 
     _dryMix = 0.f;
     _wetMix = 1.f;
@@ -76,11 +69,9 @@ PluginProcess::PluginProcess( int amountOfChannels, float sampleRate, int maxBuf
 
 PluginProcess::~PluginProcess()
 {
-    delete[] _lastSamples;
-
-    if ( scratchBuffer != nullptr ) {
-        delete[] scratchBuffer;
-        scratchBuffer = nullptr;
+    if ( _scratchBuffer != nullptr ) {
+        delete[] _scratchBuffer;
+        _scratchBuffer = nullptr;
     }
     delete bitCrusher;
     delete limiter;
@@ -121,10 +112,10 @@ void PluginProcess::setHostProperties( float sampleRate, int maxBufferSize )
 
     if ( _hostBufferSize < maxBufferSize ) {
         _hostBufferSize = maxBufferSize;
-        if ( scratchBuffer != nullptr ) {
-            delete[] scratchBuffer;
+        if ( _scratchBuffer != nullptr ) {
+            delete[] _scratchBuffer;
         }
-        scratchBuffer = new float[ _hostBufferSize ];
+        _scratchBuffer = new float[ _hostBufferSize ];
     }
 }
 

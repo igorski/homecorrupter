@@ -47,6 +47,10 @@ class BitCrusher {
             return _bits < 16 || hasLFO;
         }
 
+        inline int getBits() {
+            return _bits;
+        }
+
     private:
         int _bits; // we scale the amount to integers in the 1-16 range
         float _amount;
