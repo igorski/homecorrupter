@@ -209,6 +209,14 @@ void PluginProcess::setPlaybackRateLfo( float LFORatePercentage, float LFODepth 
     // turning LFO off
     if ( !_hasPlaybackRateLfo && wasEnabled ) {
         _actualPlaybackRate = _playbackRate;
+
+        // when playback rate LFO is deactivated and there is no slowdown for the playback rate
+        // active: sync the read pointer with the write pointer to align with incoming audio
+
+        if ( !isSlowedDown() ) {
+            _readPointer = static_cast<float>( _writePointer );
+            syncFilterPointers();
+        }
     }
 
     if ( hadChange ) {
@@ -284,10 +292,10 @@ void PluginProcess::setActualPlaybackRate( float value )
     bool wasSlowedDown  = isSlowedDown();
     _actualPlaybackRate = value;
 
-    // if slowdown is deactivated and there is no oscillation for the playback rate
-    // and no down sampling taking place: sync the read pointer with the write pointer
+    // when slowdown is deactivated and there is no oscillation for the playback rate
+    // taking place: sync the read pointer with the write pointer to align with incoming audio
 
-    if ( wasSlowedDown && !isSlowedDown() && !_hasPlaybackRateLfo && !isDownSampled() ) {
+    if ( wasSlowedDown && !isSlowedDown() && !_hasPlaybackRateLfo ) {
         _readPointer = static_cast<float>( _writePointer );
         syncFilterPointers();
     }
