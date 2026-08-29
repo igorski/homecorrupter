@@ -20,11 +20,18 @@ namespace VST {
     static const FUID PluginWithSideChainProcessorUID( 0x749F464F, 0xB499A21C, 0x0E48FFA8, 0xC0AFA4D6 );
     static const FUID PluginControllerUID( 0xB499A21C, 0x0E48FFA8, 0xC0AFA4D6, 0x749F464F );
 
-    extern float SAMPLE_RATE; // set upon initialization, see vst.cpp
+    static const float DEFAULT_SAMPLE_RATE = 44100.f; // updated in vst.cpp#setupProcessing
+    static const float DEFAULT_BUFFER_SIZE = 2048; // updated in vst.cpp#setupProcessing
 
     static const float PI       = 3.141592653589793f;
     static const float TWO_PI   = PI * 2.f;
     static const float SQRT_TWO = sqrt( 2 );
+
+    // plugin properties
+
+    static const float MAX_RECORD_SECONDS = 30.f;
+    static const float MIN_PLAYBACK_SPEED = 0.5f;
+    static const float MIN_SAMPLE_RATE    = 2000.f;
 
     // maximum and minimum rate of oscillation in Hz
     // also see plugin.uidesc to update the controls to match

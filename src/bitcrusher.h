@@ -35,12 +35,21 @@ class BitCrusher {
         void setLFO( float LFORatePercentage, float LFODepth );
         void process( float* inBuffer, int bufferSize );
 
+        void setSampleRate( float value );
         void setAmount( float value ); // range between -1 to +1
         void setInputMix( float value );
         void setOutputMix( float value );
 
-        LFO* lfo;
+        LFO lfo;
         bool hasLFO;
+
+        inline bool isActive() {
+            return _bits < 16 || hasLFO;
+        }
+
+        inline int getBits() {
+            return _bits;
+        }
 
     private:
         int _bits; // we scale the amount to integers in the 1-16 range

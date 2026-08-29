@@ -109,11 +109,11 @@ that by default compilation is for 64-bit architecture for both Intel and ARM CP
 **Windows:**
 
 ```
-cmake.exe -G "Visual Studio 16 2019" -A Win64 -S .. -B "build64"
-cmake.exe --build build64 --config Release
+cmake -G "Visual Studio 17 2022" -A x64 -S .. -B "build64"
+cmake --build build64 --config Release
 
-cmake.exe -G "Visual Studio 16 2019" -A Win32 -S .. -B "build32"
-cmake.exe --build build32 --config Release
+cmake -G "Visual Studio 17 2022" -A Win32 -S .. -B "build32"
+cmake --build build32 --config Release
 ```
 
 Which is a little more cumbersome as you compile separate binaries for the separate architectures.

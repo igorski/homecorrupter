@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2020-2026 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,7 +21,6 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 #include "../global.h"
-#include "../plugin_process.h"
 #include "controller.h"
 #include "uimessagecontroller.h"
 #include "../paramids.h"
@@ -343,6 +342,22 @@ tresult PLUGIN_API PluginController::getState( IBStream* state )
     return kResultFalse;
 }
 
+tresult PLUGIN_API PluginController::notify( Steinberg::Vst::IMessage* message )
+{
+    if ( !message ) {
+        return Steinberg::kInvalidArgument;
+    }
+    if ( strcmp( message->getMessageID(), "setSampleRate" ) == 0 )
+    {
+        double rate = 0.0;
+        if ( message->getAttributes()->getFloat( "sampleRate", rate ) == Steinberg::kResultTrue ) {
+            this->_sampleRate = rate;
+        }
+        return Steinberg::kResultOk;
+    }
+    return Steinberg::Vst::EditController::notify( message );
+}
+
 //------------------------------------------------------------------------
 tresult PluginController::receiveText( const char* text )
 {
@@ -376,57 +391,57 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
 // --- AUTO-GENERATED GETPARAM START
 
         case kResampleRateId:
-            sprintf( text, "%.2d Hz", ( int ) (( Igorski::VST::SAMPLE_RATE - Igorski::PluginProcess::MIN_SAMPLE_RATE ) * valueNormalized ) + ( int ) Igorski::PluginProcess::MIN_SAMPLE_RATE );
+            snprintf( text, sizeof( text ), "%.2d Hz", ( int ) (( _sampleRate - Igorski::VST::MIN_SAMPLE_RATE ) * valueNormalized ) + ( int ) Igorski::VST::MIN_SAMPLE_RATE );
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kBitDepthId:
-            sprintf( text, "%.d Bits", ( int ) ( 15 * valueNormalized ) + 1 );
+            snprintf( text, sizeof( text ), "%.d Bits", ( int ) ( 15 * valueNormalized ) + 1 );
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kPlaybackRateId:
-            sprintf( text, "%.2d %%", ( int ) (( valueNormalized * ( 100.f * Igorski::PluginProcess::MIN_PLAYBACK_SPEED )) + ( Igorski::PluginProcess::MIN_PLAYBACK_SPEED * 100 )));
+            snprintf( text, sizeof( text ), "%.2d %%", ( int ) (( valueNormalized * ( 100.f * Igorski::VST::MIN_PLAYBACK_SPEED )) + ( Igorski::VST::MIN_PLAYBACK_SPEED * 100 )));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kResampleLfoId:
-            sprintf( text, "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
+            snprintf( text, sizeof( text ), "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kResampleLfoDepthId:
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            snprintf( text, sizeof( text ), "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kBitCrushLfoId:
-            sprintf( text, "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
+            snprintf( text, sizeof( text ), "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kBitCrushLfoDepthId:
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            snprintf( text, sizeof( text ), "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kPlaybackRateLfoId:
-            sprintf( text, "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
+            snprintf( text, sizeof( text ), "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kPlaybackRateLfoDepthId:
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            snprintf( text, sizeof( text ), "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kWetMixId:
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            snprintf( text, sizeof( text ), "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kDryMixId:
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            snprintf( text, sizeof( text ), "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
@@ -441,21 +456,60 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
 //------------------------------------------------------------------------
 tresult PLUGIN_API PluginController::getParamValueByString( ParamID tag, TChar* string, ParamValue& valueNormalized )
 {
-    /* example, but better to use a custom Parameter as seen in RangeParameter
-    switch (tag)
+    switch ( tag )
     {
-        case kAttackId:
+        case kResampleRateId:
         {
-            Steinberg::UString wrapper ((TChar*)string, -1); // don't know buffer size here!
+            Steinberg::UString wrapper (( TChar* ) string, -1 );
             double tmp = 0.0;
-            if (wrapper.scanFloat (tmp))
+            if ( wrapper.scanFloat( tmp ))
             {
-                valueNormalized = expf (logf (10.f) * (float)tmp / 20.f);
+                tmp -= Igorski::VST::MIN_SAMPLE_RATE;
+                tmp = fmax( 0.0, fmin( _sampleRate - Igorski::VST::MIN_SAMPLE_RATE, tmp ));
+                valueNormalized = static_cast<float>( tmp ) / ( _sampleRate - Igorski::VST::MIN_SAMPLE_RATE );
                 return kResultTrue;
             }
             return kResultFalse;
         }
-    }*/
+        case kBitDepthId:
+        {
+            Steinberg::UString wrapper (( TChar* ) string, -1 );
+            int64 tmp = 0.0;
+            if ( wrapper.scanInt( tmp ))
+            {
+                tmp = std::max( 1L, std::min( 16L, static_cast<long>( tmp )));
+                valueNormalized = static_cast<float>( tmp ) / 16.f;
+                return kResultTrue;
+            }
+            return kResultFalse;
+        }
+        case kPlaybackRateId:
+        {
+            Steinberg::UString wrapper (( TChar* ) string, -1 );
+            double tmp = 0.0;
+            if ( wrapper.scanFloat( tmp ))
+            {
+                tmp = ( tmp / ( Igorski::VST::MIN_PLAYBACK_SPEED * 100 )) - 1.0;
+                valueNormalized = fmax( 0.0, fmin( 1.0, tmp ));
+                return kResultTrue;
+            }
+            return kResultFalse;
+        }
+        case kResampleLfoDepthId:
+        case kBitCrushLfoDepthId:
+        case kPlaybackRateLfoDepthId:
+        {
+            Steinberg::UString wrapper (( TChar* ) string, -1 );
+            double tmp = 0.0;
+            if ( wrapper.scanFloat( tmp ))
+            {
+                tmp /= 100;
+                valueNormalized = fmax( 0.0, fmin( 1.0, tmp ));
+                return kResultTrue;
+            }
+            return kResultFalse;
+        }
+    }
     return EditControllerEx1::getParamValueByString( tag, string, valueNormalized );
 }
 

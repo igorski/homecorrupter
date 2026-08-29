@@ -38,13 +38,12 @@ BitCrusher::BitCrusher( float amount, float inputMix, float outputMix )
 
     _tempAmount = _amount;
 
-    lfo = new LFO();
     hasLFO = false;
 }
 
 BitCrusher::~BitCrusher()
 {
-    delete lfo;
+    // nowt...
 }
 
 /* public methods */
@@ -59,7 +58,7 @@ void BitCrusher::setLFO( float LFORatePercentage, float LFODepth )
     bool hadChange = ( wasEnabled != enabled ) || _lfoDepth != LFODepth;
 
     if ( enabled )
-        lfo->setRate(
+        lfo.setRate(
             VST::MIN_LFO_RATE() + (
                 LFORatePercentage * ( VST::MAX_LFO_RATE() - VST::MIN_LFO_RATE() )
             )
@@ -80,11 +79,12 @@ void BitCrusher::setLFO( float LFORatePercentage, float LFODepth )
 void BitCrusher::process( float* inBuffer, int bufferSize )
 {
     // sound should not be crushed ? do nothing
-    if ( _bits == 16 && !hasLFO )
+    if ( !isActive() ) {
         return;
+    }
 
     int bitsPlusOne = _bits + 1;
-
+    
     for ( int i = 0; i < bufferSize; ++i )
     {
         short input = ( short ) (( inBuffer[ i ] * _inputMix ) * SHRT_MAX );
@@ -94,7 +94,7 @@ void BitCrusher::process( float* inBuffer, int bufferSize )
 
         if ( hasLFO ) {
             // multiply by .5 and add .5 to make the LFO's bipolar waveform unipolar
-            float lfoValue = lfo->peek() * .5f  + .5f;
+            float lfoValue = lfo.peek() * .5f  + .5f;
             _tempAmount = std::min( _lfoMax, _lfoMin + _lfoRange * lfoValue );
 
             // recalculate the current resolution
@@ -105,6 +105,11 @@ void BitCrusher::process( float* inBuffer, int bufferSize )
 }
 
 /* setters */
+
+void BitCrusher::setSampleRate( float value )
+{
+    lfo.setSampleRate( value );
+}
 
 void BitCrusher::setAmount( float value )
 {

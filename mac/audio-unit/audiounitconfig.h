@@ -28,7 +28,7 @@
 // Hexadecimal indexes representing: [0] = main version, [1] = 0 = dot, [2] = sub version, [3] = 0 = dot, [4] = sub-sub version,
 // e.g. 1.0.0 == 0x10000 == 65536, 1.2.3 = 0x10203 = 66051
 // needs to correspond with semver version in Info.plist
-#define kAUcomponentVersion 65795
+#define kAUcomponentVersion 66048
 
 // Supported number of channels of your audio unit.
 // Integer indexes representing: [0] = input count, [1] = output count, [2] = 2nd input count,

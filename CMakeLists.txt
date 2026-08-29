@@ -11,11 +11,11 @@ set(CMAKE_COLOR_MAKEFILE ON)
 project(Homecorrupter)
 set(PROJECT_VERSION 1)
 set(target homecorrupter)
-set(copyright "igorski.nl 2020-2024")
+set(copyright "igorski.nl 2020-2026")
 set(major_version 1)
-set(minor_version 1)
-set(release_number 3)
-set(build_number 1) # TODO supply through CLI (build number is not included in public facing version strings)
+set(minor_version 2)
+set(release_number 0)
+set(build_number 0) # TODO supply through CLI (build number is not included in public facing version strings)
 set(version_string "${major_version}.${minor_version}.${release_number}") # also see audiounitconfig.h#kAUcomponentVersion and related Info.plist
 set(SMTG_CREATE_MODULE_INFO false)
 
@@ -120,12 +120,15 @@ set(vst_sources
     src/global.h
     src/audiobuffer.h
     src/audiobuffer.cpp
+    src/automakeupgain.h
+    src/automakeupgain.cpp
     src/bitcrusher.h
     src/bitcrusher.cpp
     src/lfo.h
     src/lfo.cpp
     src/limiter.h
     src/limiter.cpp
+    src/linearsmoothing.h
     src/lowpassfilter.h
     src/lowpassfilter.cpp
     src/paramids.h

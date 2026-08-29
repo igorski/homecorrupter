@@ -9,7 +9,7 @@ if not defined VST3_SDK_ROOT (
 
 echo Building using VST3 SDK located at %VST3_SDK_ROOT%
 
-cmake -G "Visual Studio 16 2019" -A Win32 -S .. -B "build32" -DSMTG_CREATE_VST2_VERSION=ON -DVST3_SDK_ROOT=%VST3_SDK_ROOT_32BIT%
+cmake -G "Visual Studio 17 2022" -A Win32 -S .. -B "build32" -DSMTG_CREATE_VST2_VERSION=ON -DSMTG_CREATE_BUNDLE_FOR_WINDOWS=ON -DVST3_SDK_ROOT=%VST3_SDK_ROOT_32BIT%
 cmake --build build32 --config Release
 
 rename build32\VST3\Release\homecorrupter.vst3\Contents\x86-win\homecorrupter.vst3 homecorrupter.dll

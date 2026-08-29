@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2018 Igor Zinken - https://www.igorski.nl
+ * Copyright (c) 2026 Igor Zinken - https://www.igorski.nl
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -20,46 +20,34 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include "lfo.h"
+#ifndef __AUTO_MAKEUP_GAIN_H_INCLUDED__
+#define __AUTO_MAKEUP_GAIN_H_INCLUDED__
+
+#include "linearsmoothing.h"
 
 namespace Igorski {
-
-LFO::LFO() {
-    setSampleRate( VST::DEFAULT_SAMPLE_RATE );
-    
-    _rate        = VST::MIN_LFO_RATE();
-    _accumulator = 0.f;
-}
-
-LFO::~LFO() {
-
-}
-
-/* public methods */
-
-void LFO::setSampleRate( float value )
+class AutoMakeUpGain
 {
-    _sampleRate = value;
+    // values are in seconds
+
+    static constexpr double WINDOW_SIZE    = 0.02;
+    static constexpr double GAIN_SMOOTHING = 0.01;
+
+    public:
+        void prepare( float sampleRate );
+
+        /**
+         * Apply makeup gain to make the differences between
+         * provided pre- and post buffer states smaller
+         */
+        void apply( float* pre, float* post, int bufferSize, float maxBoost );
+
+    private:
+        int rmsWindowSize = 0;
+        LinearSmoothing smoother;
+
+        float computeRMS( const float* data, int numSamples );
+};
 }
 
-float LFO::getRate()
-{
-    return _rate;
-}
-
-void LFO::setRate( float value )
-{
-    _rate = value;
-}
-
-void LFO::setAccumulator( float value )
-{
-    _accumulator = value;
-}
-
-float LFO::getAccumulator()
-{
-    return _accumulator;
-}
-
-}
+#endif
