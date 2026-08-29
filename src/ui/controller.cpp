@@ -391,57 +391,57 @@ tresult PLUGIN_API PluginController::getParamStringByValue( ParamID tag, ParamVa
 // --- AUTO-GENERATED GETPARAM START
 
         case kResampleRateId:
-            sprintf( text, "%.2d Hz", ( int ) (( _sampleRate - Igorski::VST::MIN_SAMPLE_RATE ) * valueNormalized ) + ( int ) Igorski::VST::MIN_SAMPLE_RATE );
+            snprintf( text, sizeof( text ), "%.2d Hz", ( int ) (( _sampleRate - Igorski::VST::MIN_SAMPLE_RATE ) * valueNormalized ) + ( int ) Igorski::VST::MIN_SAMPLE_RATE );
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kBitDepthId:
-            sprintf( text, "%.d Bits", ( int ) ( 15 * valueNormalized ) + 1 );
+            snprintf( text, sizeof( text ), "%.d Bits", ( int ) ( 15 * valueNormalized ) + 1 );
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kPlaybackRateId:
-            sprintf( text, "%.2d %%", ( int ) (( valueNormalized * ( 100.f * Igorski::VST::MIN_PLAYBACK_SPEED )) + ( Igorski::VST::MIN_PLAYBACK_SPEED * 100 )));
+            snprintf( text, sizeof( text ), "%.2d %%", ( int ) (( valueNormalized * ( 100.f * Igorski::VST::MIN_PLAYBACK_SPEED )) + ( Igorski::VST::MIN_PLAYBACK_SPEED * 100 )));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kResampleLfoId:
-            sprintf( text, "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
+            snprintf( text, sizeof( text ), "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kResampleLfoDepthId:
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            snprintf( text, sizeof( text ), "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kBitCrushLfoId:
-            sprintf( text, "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
+            snprintf( text, sizeof( text ), "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kBitCrushLfoDepthId:
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            snprintf( text, sizeof( text ), "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kPlaybackRateLfoId:
-            sprintf( text, "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
+            snprintf( text, sizeof( text ), "%.2f Hz", normalizedParamToPlain( tag, valueNormalized ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kPlaybackRateLfoDepthId:
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            snprintf( text, sizeof( text ), "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kWetMixId:
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            snprintf( text, sizeof( text ), "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
         case kDryMixId:
-            sprintf( text, "%.2d %%", ( int ) ( valueNormalized * 100.f ));
+            snprintf( text, sizeof( text ), "%.2d %%", ( int ) ( valueNormalized * 100.f ));
             Steinberg::UString( string, 128 ).fromAscii( text );
             return kResultTrue;
 
