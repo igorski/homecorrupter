@@ -93,7 +93,7 @@ void PluginProcess::setWetMix( float value )
 
 void PluginProcess::setHostProperties( float sampleRate, int maxBufferSize )
 {
-    cacheMaxDownSample();
+    cacheMaxDownSample( sampleRate );
 
     if ( _hostSampleRate != sampleRate ) {
         _hostSampleRate = sampleRate;
@@ -267,9 +267,9 @@ void PluginProcess::cacheLfo()
     _playbackRateLfoMin   = std::max( 0.f, _playbackRate - _playbackRateLfoRange * .5f );
 }
 
-void PluginProcess::cacheMaxDownSample()
+void PluginProcess::cacheMaxDownSample( float sampleRate )
 {
-    _maxDownSample = _hostSampleRate / VST::MIN_SAMPLE_RATE;
+    _maxDownSample = sampleRate / VST::MIN_SAMPLE_RATE;
 }
 
 void PluginProcess::setActualDownSampling( float value )

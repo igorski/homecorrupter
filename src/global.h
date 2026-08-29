@@ -30,7 +30,7 @@ namespace VST {
     // plugin properties
 
     static const float MAX_RECORD_SECONDS = 30.f;
-    static const float MIN_PLAYBACK_SPEED = .5f;
+    static const float MIN_PLAYBACK_SPEED = 0.5f;
     static const float MIN_SAMPLE_RATE    = 2000.f;
 
     // maximum and minimum rate of oscillation in Hz

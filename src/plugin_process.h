@@ -194,7 +194,7 @@ class PluginProcess
 
         void cacheDownSamplingValues();
         void cacheLfo();
-        void cacheMaxDownSample();
+        void cacheMaxDownSample( float sampleRate );
 
         void setActualDownSampling( float value );
         void setActualPlaybackRate( float value );

@@ -465,8 +465,8 @@ tresult PLUGIN_API PluginController::getParamValueByString( ParamID tag, TChar* 
             if ( wrapper.scanFloat( tmp ))
             {
                 tmp -= Igorski::VST::MIN_SAMPLE_RATE;
-                tmp = fmax( 0.0, fmin( _sampleRate, tmp ));
-                valueNormalized = tmp / ( _sampleRate - Igorski::VST::MIN_SAMPLE_RATE );
+                tmp = fmax( 0.0, fmin( _sampleRate - Igorski::VST::MIN_SAMPLE_RATE, tmp ));
+                valueNormalized = static_cast<float>( tmp ) / ( _sampleRate - Igorski::VST::MIN_SAMPLE_RATE );
                 return kResultTrue;
             }
             return kResultFalse;
@@ -477,8 +477,20 @@ tresult PLUGIN_API PluginController::getParamValueByString( ParamID tag, TChar* 
             int64 tmp = 0.0;
             if ( wrapper.scanInt( tmp ))
             {
-                tmp = std::max( 1L, std::min( 16L, ( long ) tmp ));
+                tmp = std::max( 1L, std::min( 16L, static_cast<long>( tmp )));
                 valueNormalized = static_cast<float>( tmp ) / 16.f;
+                return kResultTrue;
+            }
+            return kResultFalse;
+        }
+        case kPlaybackRateId:
+        {
+            Steinberg::UString wrapper (( TChar* ) string, -1 );
+            double tmp = 0.0;
+            if ( wrapper.scanFloat( tmp ))
+            {
+                tmp = ( tmp / ( Igorski::VST::MIN_PLAYBACK_SPEED * 100 )) - 1.0;
+                valueNormalized = fmax( 0.0, fmin( 1.0, tmp ));
                 return kResultTrue;
             }
             return kResultFalse;
