@@ -15,7 +15,7 @@ if not defined VST3_SDK_ROOT (
 
 echo Building using VST3 SDK located at %VST3_SDK_ROOT%
 
-cmake -G "Visual Studio 17 2022" -A x64 %SMTG_CREATE_VST2_VERSION% -DVST3_SDK_ROOT=%VST3_SDK_ROOT% ..
+cmake -G "Visual Studio 17 2022" -A x64 %SMTG_CREATE_VST2_VERSION% -DVST3_SDK_ROOT=%VST3_SDK_ROOT% -DSMTG_CREATE_BUNDLE_FOR_WINDOWS=ON ..
 cmake --build . --config Release
 
 IF /I "%1"=="vst2" (
