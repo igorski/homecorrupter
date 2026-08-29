@@ -36,6 +36,7 @@ if(MSVC)
 endif()
 
 if(UNIX)
+    set(SMTG_CREATE_PLUGIN_LINK OFF) # overcome erasing ~/Library/Audio/Plug-Ins/VST3
     if(APPLE)
         if (XCODE)
             set(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++17")
