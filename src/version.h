@@ -24,7 +24,7 @@
 #define stringOriginalFilename  "homecorrupter.vst3"
 #define stringFileDescription   "Homecorrupter plugin"
 #define stringCompanyName       "igorski.nl\0"
-#define stringLegalCopyright    #PLUGIN_COPYRIGHT
+#define stringLegalCopyright    PLUGIN_COPYRIGHT
 #define stringLegalTrademarks   "VST is a trademark of Steinberg Media Technologies GmbH"
 
 #endif
